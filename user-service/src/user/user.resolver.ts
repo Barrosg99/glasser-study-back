@@ -23,7 +23,7 @@ export class UserResolver {
   }
 
   @Mutation((returns) => User)
-  async createUser(@Args('createUserData') createUserData: CreateUserDto) {
+  async signUp(@Args('createUserData') createUserData: CreateUserDto) {
     return this.usersService.create(createUserData);
   }
 
