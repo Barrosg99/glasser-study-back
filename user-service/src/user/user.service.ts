@@ -33,18 +33,31 @@ export class UserService {
   }
 
   async edit(userData: CreateUserDto, userId: string): Promise<User> {
-    const hasEmailAlready = await this.userModel.findOne({
-      email: userData.email,
-      _id: { $ne: userId },
-    });
+    const { email, password } = userData;
 
-    if (hasEmailAlready) throw new Error('Email already on use.');
+    if (email) {
+      const hasEmailAlready = await this.userModel.findOne({
+        email: userData.email,
+        _id: { $ne: userId },
+      });
 
-    userData.password = await bcrypt.hash(userData.password, saltOrRounds);
+      if (hasEmailAlready) throw new Error('Email already on use.');
+    }
+
+    if (password) {
+      userData.password = await bcrypt.hash(userData.password, saltOrRounds);
+    }
+
+    // Remover campos undefined/null
+    const filteredData = Object.fromEntries(
+      Object.entries(userData).filter(
+        ([_, value]) => value !== undefined && value !== null,
+      ),
+    );
 
     const updatedUser = await this.userModel.findOneAndUpdate(
       { _id: userId },
-      { $set: { ...userData } },
+      { $set: { ...filteredData } },
       { new: true },
     );
 
