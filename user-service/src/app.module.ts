@@ -10,6 +10,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserModule } from './user/user.module';
 import { HealthController } from './app.controller';
+import { GroupModule } from './group/group.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { HealthController } from './app.controller';
       path: '/',
     }),
     UserModule,
+    GroupModule,
   ],
   controllers: [HealthController],
 })

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import {
   Directive,
   Field,
@@ -21,7 +21,7 @@ registerEnumType(UserGoal, { name: 'UserGoal' });
 @Directive('@key(fields: "id")')
 export class User {
   @Field(() => ID)
-  id: string;
+  id: Types.ObjectId;
 
   @Field()
   @Prop({ required: true })

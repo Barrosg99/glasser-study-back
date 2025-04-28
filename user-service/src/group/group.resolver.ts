@@ -1,13 +1,14 @@
 import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
+import { Group } from './models/group.model';
 
-@Resolver('Group')
+@Resolver((of) => Group)
 export class GroupResolver {
   constructor(private readonly groupService: GroupService) {}
 
-  @Mutation('createGroup')
-  create(
+  @Mutation((returns) => Group)
+  createGroup(
     @Context('userId') userId: string,
     @Args('createGroupData') createGroupDto: CreateGroupDto,
   ) {

@@ -7,7 +7,7 @@ import { User } from 'src/user/models/user.model';
 @Schema({ timestamps: true })
 export class Group extends Document {
   @Field(() => ID)
-  _id: Types.ObjectId;
+  id: Types.ObjectId;
 
   @Field(() => String)
   @Prop({ required: true })
