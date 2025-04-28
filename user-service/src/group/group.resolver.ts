@@ -1,11 +1,34 @@
-import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Context,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { Group } from './models/group.model';
+import { User } from 'src/user/models/user.model';
+import { UserService } from 'src/user/user.service';
 
 @Resolver((of) => Group)
 export class GroupResolver {
-  constructor(private readonly groupService: GroupService) {}
+  constructor(
+    private readonly groupService: GroupService,
+    private readonly userService: UserService,
+  ) {}
+
+  @ResolveField(() => [User])
+  async members(@Parent() group: Group) {
+    return this.userService.findByIds(group.members);
+  }
+
+  @ResolveField(() => [User])
+  async moderator(@Parent() group: Group) {
+    return this.userService.findOne(group.moderator);
+  }
 
   @Mutation((returns) => Group)
   createGroup(
@@ -17,10 +40,12 @@ export class GroupResolver {
     return this.groupService.create(createGroupDto, userId);
   }
 
-  // @Query('groups')
-  // findAll() {
-  //   return this.groupService.findAll();
-  // }
+  @Query((returns) => [Group])
+  myGroups(@Context('userId') userId: string) {
+    if (!userId) throw new Error('You must be logged to execute this action.');
+
+    return this.groupService.findAll(userId);
+  }
 
   // @Query('group')
   // findOne(@Args('id', { type: () => ID }) id: string) {

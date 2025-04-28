@@ -19,7 +19,7 @@ export class Group extends Document {
 
   @Field(() => User)
   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
-  moderatorId: Types.ObjectId;
+  moderator: Types.ObjectId;
 
   @Field(() => [User])
   @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })

@@ -22,6 +22,7 @@ registerEnumType(UserGoal, { name: 'UserGoal' });
 export class User {
   @Field(() => ID)
   id: Types.ObjectId;
+  // id: string;
 
   @Field()
   @Prop({ required: true })

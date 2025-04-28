@@ -25,7 +25,7 @@ export class GroupService {
 
     const group = await this.groupModel.create({
       ...createGroupDto,
-      moderatorId: userId,
+      moderator: userId,
       members: [userId, ...members.map((member) => member._id)],
     });
     return group;
