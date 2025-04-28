@@ -59,16 +59,6 @@ export class GroupService {
     return this.groupModel.find(query);
   }
 
-  async findOne(id: string) {
-    // TODO: Implement find one group logic
-    return {
-      id,
-      name: 'Test Group',
-      description: 'Test Description',
-      memberEmails: [],
-    };
-  }
-
   async remove(id: string, userId: Types.ObjectId) {
     const group = await this.groupModel.findOne({ _id: id, moderator: userId });
     if (!group) throw new Error('Group not found');

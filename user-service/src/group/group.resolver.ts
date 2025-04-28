@@ -66,15 +66,4 @@ export class GroupResolver {
 
     return this.groupService.remove(id, userId);
   }
-  
-
-  // @Query('group')
-  // findOne(@Args('id', { type: () => ID }) id: string) {
-  //   return this.groupService.findOne(id);
-  // }
-
-  // @Mutation('removeGroup')
-  // remove(@Args('id', { type: () => ID }) id: string) {
-  //   return this.groupService.remove(id);
-  // }
 }
