@@ -39,16 +39,6 @@ export class GroupResolver {
     return group.moderator.equals(userId);
   }
 
-  @Mutation((returns) => Group)
-  createGroup(
-    @Context('userId') userId: Types.ObjectId,
-    @Args('createGroupData') createGroupDto: CreateGroupDto,
-  ) {
-    if (!userId) throw new Error('You must be logged to execute this action.');
-
-    return this.groupService.create(createGroupDto, userId);
-  }
-
   @Query((returns) => [Group])
   myGroups(@Context('userId') userId: Types.ObjectId) {
     if (!userId) throw new Error('You must be logged to execute this action.');
@@ -57,15 +47,26 @@ export class GroupResolver {
   }
 
   @Mutation((returns) => Group)
-  updateGroup(
+  saveGroup(
     @Context('userId') userId: Types.ObjectId,
-    @Args('id', { type: () => String }) id: string,
-    @Args('updateGroupData') updateGroupDto: CreateGroupDto,
+    @Args('id', { type: () => String, nullable: true }) id: string,
+    @Args('saveGroupData') saveGroupDto: CreateGroupDto,
   ) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
-    return this.groupService.update(id, updateGroupDto);
+    return this.groupService.save(saveGroupDto, userId, id);
   }
+
+  @Mutation((returns) => Group)
+  removeGroup(
+    @Context('userId') userId: Types.ObjectId,
+    @Args('id', { type: () => String }) id: string,
+  ) {
+    if (!userId) throw new Error('You must be logged to execute this action.');
+
+    return this.groupService.remove(id, userId);
+  }
+  
 
   // @Query('group')
   // findOne(@Args('id', { type: () => ID }) id: string) {
