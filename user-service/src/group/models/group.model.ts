@@ -21,6 +21,9 @@ export class Group extends Document {
   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
   moderator: Types.ObjectId;
 
+  @Field(() => Boolean)
+  isModerator: boolean;
+
   @Field(() => [User])
   @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
   members: Types.ObjectId[];

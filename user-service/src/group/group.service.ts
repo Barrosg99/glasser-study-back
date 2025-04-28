@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { Group } from './models/group.model';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { User } from 'src/user/models/user.model';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class GroupService {
     @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
-  async create(createGroupDto: CreateGroupDto, userId: string): Promise<Group> {
+  async create(createGroupDto: CreateGroupDto, userId: Types.ObjectId): Promise<Group> {
     const { memberEmails } = createGroupDto;
 
     const members = await this.userModel.find({
@@ -31,7 +31,7 @@ export class GroupService {
     return group;
   }
 
-  async findAll(userId?: string): Promise<Group[]> {
+  async findAll(userId?: Types.ObjectId): Promise<Group[]> {
     const query: FilterQuery<Group> = {};
     if (userId) {
       query.members = { $in: [userId] };
@@ -51,11 +51,38 @@ export class GroupService {
   }
 
   async update(id: string, updateGroupDto: CreateGroupDto) {
-    // TODO: Implement update group logic
-    return {
-      id,
-      ...updateGroupDto,
-    };
+    const { memberEmails } = updateGroupDto;
+    const groupId = new Types.ObjectId(id);
+
+    // Find the existing group
+    const existingGroup = await this.groupModel.findById(groupId);
+    if (!existingGroup) {
+      throw new Error('Group not found');
+    }
+
+    // Find new members by email
+    const newMembers = await this.userModel.find({
+      email: { $in: memberEmails },
+    });
+
+    if (newMembers.length !== memberEmails.length) {
+      throw new Error('Some members were not found.');
+    }
+
+    // Update the group with new data and members
+    const updatedGroup = await this.groupModel.findByIdAndUpdate(
+      groupId,
+      {
+        ...updateGroupDto,
+        members: [
+          existingGroup.moderator,
+          ...newMembers.map((member) => member._id),
+        ],
+      },
+      { new: true },
+    );
+
+    return updatedGroup;
   }
 
   async remove(id: string) {
