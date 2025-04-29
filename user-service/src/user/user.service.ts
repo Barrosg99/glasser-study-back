@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -80,7 +80,11 @@ export class UserService {
     };
   }
 
-  async findOne(id: string): Promise<User> {
+  async findOne(id: string | Types.ObjectId): Promise<User> {
     return this.userModel.findById(id);
+  }
+
+  async findByIds(ids: Types.ObjectId[]): Promise<User[]> {
+    return this.userModel.find({ _id: { $in: ids } });
   }
 }

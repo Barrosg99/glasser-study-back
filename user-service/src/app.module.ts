@@ -10,6 +10,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserModule } from './user/user.module';
 import { HealthController } from './app.controller';
+import { GroupModule } from './group/group.module';
+import { Types } from 'mongoose';
 
 @Module({
   imports: [
@@ -36,8 +38,8 @@ import { HealthController } from './app.controller';
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
       context: ({ req }) => {
-        const userId = req.headers['user-id'];
-        if (userId) return { userId };
+        const userId = req.headers['user-id'] as string;
+        if (userId) return { userId: new Types.ObjectId(userId) };
       },
       autoSchemaFile: true,
       playground: false,
@@ -45,6 +47,7 @@ import { HealthController } from './app.controller';
       path: '/',
     }),
     UserModule,
+    GroupModule,
   ],
   controllers: [HealthController],
 })
