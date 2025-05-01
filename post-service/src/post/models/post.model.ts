@@ -1,6 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { Document, Types } from 'mongoose';
+
+export enum MaterialType {
+  ARTICLE = 'article',
+  EXERCISE = 'exercise',
+  PODCAST = 'podcast',
+  SUMMARY = 'summary',
+  SIMULATOR = 'simulator',
+  VIDEO = 'video',
+  OTHER = 'other',
+}
+
+registerEnumType(MaterialType, { name: 'MaterialType' });
 
 @ObjectType()
 @Schema()
@@ -13,9 +25,9 @@ export class Material {
   @Prop({ required: true })
   link: string;
 
-  @Field()
-  @Prop({ required: true })
-  type: string;
+  @Field(() => MaterialType)
+  @Prop({ required: true, enum: MaterialType })
+  type: MaterialType;
 }
 
 @ObjectType()

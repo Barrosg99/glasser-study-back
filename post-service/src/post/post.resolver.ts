@@ -28,13 +28,14 @@ export class PostResolver {
   }
 
   @Mutation(() => Post)
-  createPost(
+  savePost(
     @Context('userId') userId: Types.ObjectId,
-    @Args('createPostInput') savePostInput: SavePostDto,
+    @Args('savePostInput') savePostInput: SavePostDto,
+    @Args('id', { type: () => ID, nullable: true }) id?: string,
   ) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
-    return this.postService.create(savePostInput, userId);
+    return this.postService.save(id, savePostInput, userId);
   }
 
   @Query(() => [Post], { name: 'posts' })
@@ -52,17 +53,6 @@ export class PostResolver {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
     return this.postService.findAll(userId);
-  }
-
-  @Mutation(() => Post)
-  updatePost(
-    @Context('userId') userId: Types.ObjectId,
-    @Args('id') id: string,
-    @Args('updatePostInput') updatePostInput: SavePostDto,
-  ) {
-    if (!userId) throw new Error('You must be logged to execute this action.');
-
-    return this.postService.update(id, userId, updatePostInput);
   }
 
   @Mutation(() => Post)

@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-
+import { MaterialType } from '../models/post.model';
 @InputType()
 export class MaterialInput {
   @Field()
@@ -8,8 +8,8 @@ export class MaterialInput {
   @Field()
   link: string;
 
-  @Field()
-  type: string;
+  @Field(() => MaterialType)
+  type: MaterialType;
 }
 
 @InputType()
