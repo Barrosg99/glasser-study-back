@@ -1,12 +1,37 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Document } from 'mongoose';
+import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
+import { Document, Types } from 'mongoose';
+
+@ObjectType()
+@Schema()
+export class Material {
+  @Field()
+  @Prop({ required: true })
+  name: string;
+
+  @Field()
+  @Prop({ required: true })
+  link: string;
+
+  @Field()
+  @Prop({ required: true })
+  type: string;
+}
+
+@ObjectType()
+@Directive('@extends')
+@Directive('@key(fields: "id")')
+export class User {
+  @Field((type) => ID)
+  @Directive('@external')
+  id: Types.ObjectId;
+}
 
 @ObjectType()
 @Schema()
 export class Post extends Document {
   @Field(() => ID)
-  _id: string;
+  id: Types.ObjectId;
 
   @Field()
   @Prop({ required: true })
@@ -14,11 +39,23 @@ export class Post extends Document {
 
   @Field()
   @Prop({ required: true })
-  content: string;
+  subject: string;
 
   @Field()
   @Prop({ required: true })
-  authorId: string;
+  description: string;
+
+  @Field(() => [String], { nullable: true })
+  @Prop()
+  tags?: string[];
+
+  @Field(() => [Material], { nullable: 'itemsAndList' })
+  @Prop()
+  materials?: Material[];
+
+  @Field(() => User)
+  @Prop({ type: Types.ObjectId })
+  author: Types.ObjectId;
 
   @Field()
   @Prop({ default: Date.now })
@@ -29,4 +66,4 @@ export class Post extends Document {
   updatedAt: Date;
 }
 
-export const PostSchema = SchemaFactory.createForClass(Post); 
+export const PostSchema = SchemaFactory.createForClass(Post);

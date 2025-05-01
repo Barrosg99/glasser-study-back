@@ -1,23 +1,47 @@
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloFederationDriver, ApolloFederationDriverConfig } from '@nestjs/apollo';
+import {
+  ApolloFederationDriver,
+  ApolloFederationDriverConfig,
+} from '@nestjs/apollo';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PostModule } from './post/post.module';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { Types } from 'mongoose';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     GraphQLModule.forRoot<ApolloFederationDriverConfig>({
       driver: ApolloFederationDriver,
+      context: ({ req }) => {
+        const userId = req.headers['user-id'] as string;
+        if (userId) return { userId: new Types.ObjectId(userId) };
+      },
       autoSchemaFile: true,
       playground: false,
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
       path: '/',
     }),
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/post-service'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        const mongoUser = configService.get<string>('MONGO_USERNAME');
+        const mongoPassword = configService.get<string>('MONGO_PASSWORD');
+        const mongoHost = configService.get<string>('MONGO_HOST');
+        const mongoPort = configService.get<string>('MONGO_PORT');
+        const mongoDB = configService.get<string>('MONGO_DB');
+
+        return {
+          uri:
+            configService.get<string>('MONGO_URI') ||
+            `mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}/${mongoDB}?authSource=admin`,
+        };
+      },
+      inject: [ConfigService],
+    }),
     PostModule,
   ],
 })
-export class AppModule {} 
+export class AppModule {}

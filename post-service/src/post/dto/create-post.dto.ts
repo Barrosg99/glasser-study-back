@@ -1,13 +1,30 @@
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
+export class MaterialInput {
+  @Field()
+  name: string;
+
+  @Field()
+  link: string;
+
+  @Field()
+  type: string;
+}
+
+@InputType()
 export class CreatePostDto {
   @Field()
   readonly title: string;
 
   @Field()
-  readonly content: string;
-
+  readonly subject: string;
   @Field()
-  readonly authorId: string;
+  readonly description: string;
+
+  @Field(() => [String], { nullable: true })
+  readonly tags?: string[];
+
+  @Field(() => [MaterialInput], { nullable: 'itemsAndList' })
+  readonly materials?: MaterialInput[];
 }
