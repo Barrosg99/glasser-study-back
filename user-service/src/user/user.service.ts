@@ -6,6 +6,7 @@ import { User } from './models/user.model';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoggedUserDto, LoggedUserResponse } from './dto/logged-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { MailerService } from '@nestjs-modules/mailer';
 
 const saltOrRounds = 10;
 
@@ -14,6 +15,7 @@ export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly jwtService: JwtService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -85,5 +87,34 @@ export class UserService {
 
   async findByIds(ids: Types.ObjectId[]): Promise<User[]> {
     return this.userModel.find({ _id: { $in: ids } });
+  }
+
+  async resetPassword(email: string): Promise<boolean> {
+    const user = await this.userModel.findOne({ email });
+
+    if (!user) throw new Error('User not found');
+
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$!';
+    let newPassword = '';
+    for (let i = 0; i < 10; i++) {
+      newPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, saltOrRounds);
+
+    await this.userModel.updateOne(
+      { _id: user._id },
+      { password: hashedPassword },
+    );
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Password Reset',
+      text: `Your new password is: ${newPassword}`,
+      html: `<p>Your new password is: <strong>${newPassword}</strong></p>`,
+    });
+
+    return true;
   }
 }
