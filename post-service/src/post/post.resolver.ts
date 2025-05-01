@@ -17,6 +17,11 @@ import { Types } from 'mongoose';
 export class PostResolver {
   constructor(private readonly postService: PostService) {}
 
+  @ResolveField(() => Boolean)
+  isAuthor(@Parent() post: Post, @Context('userId') userId: Types.ObjectId) {
+    return post.author.equals(userId);
+  }
+
   @ResolveField(() => User)
   async author(@Parent() post: Post) {
     return { _typename: 'User', id: post.author };

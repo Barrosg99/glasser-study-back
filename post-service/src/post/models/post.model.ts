@@ -58,6 +58,9 @@ export class Post extends Document {
   author: Types.ObjectId;
 
   @Field()
+  isAuthor: Boolean;
+
+  @Field()
   @Prop({ default: Date.now })
   createdAt: Date;
 
