@@ -10,7 +10,7 @@ import {
 } from '@nestjs/graphql';
 import { PostService } from './post.service';
 import { Post, User } from './models/post.model';
-import { CreatePostDto } from './dto/create-post.dto';
+import { SavePostDto } from './dto/save-post.dto';
 import { Types } from 'mongoose';
 
 @Resolver(() => Post)
@@ -25,11 +25,11 @@ export class PostResolver {
   @Mutation(() => Post)
   createPost(
     @Context('userId') userId: Types.ObjectId,
-    @Args('createPostInput') createPostInput: CreatePostDto,
+    @Args('createPostInput') savePostInput: SavePostDto,
   ) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
-    return this.postService.create(createPostInput, userId);
+    return this.postService.create(savePostInput, userId);
   }
 
   @Query(() => [Post], { name: 'posts' })
@@ -44,16 +44,29 @@ export class PostResolver {
 
   @Query(() => [Post], { name: 'myPosts' })
   findMyPosts(@Context('userId') userId: Types.ObjectId) {
+    if (!userId) throw new Error('You must be logged to execute this action.');
+
     return this.postService.findAll(userId);
   }
 
-  // @Mutation(() => Post)
-  // updatePost(@Args('updatePostInput') updatePostInput: UpdatePostInput) {
-  //   return this.postService.update(updatePostInput.id, updatePostInput);
-  // }
+  @Mutation(() => Post)
+  updatePost(
+    @Context('userId') userId: Types.ObjectId,
+    @Args('id') id: string,
+    @Args('updatePostInput') updatePostInput: SavePostDto,
+  ) {
+    if (!userId) throw new Error('You must be logged to execute this action.');
 
-  // @Mutation(() => Post)
-  // removePost(@Args('id', { type: () => ID }) id: string) {
-  //   return this.postService.remove(id);
-  // }
+    return this.postService.update(id, userId, updatePostInput);
+  }
+
+  @Mutation(() => Post)
+  removePost(
+    @Context('userId') userId: Types.ObjectId,
+    @Args('id', { type: () => ID }) id: string,
+  ) {
+    if (!userId) throw new Error('You must be logged to execute this action.');
+
+    return this.postService.remove(id, userId);
+  }
 }

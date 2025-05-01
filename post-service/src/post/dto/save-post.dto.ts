@@ -13,7 +13,7 @@ export class MaterialInput {
 }
 
 @InputType()
-export class CreatePostDto {
+export class SavePostDto {
   @Field()
   readonly title: string;
 

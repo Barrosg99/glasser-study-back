@@ -22,13 +22,13 @@ export class Material {
 @Directive('@extends')
 @Directive('@key(fields: "id")')
 export class User {
-  @Field((type) => ID)
+  @Field(() => ID)
   @Directive('@external')
   id: Types.ObjectId;
 }
 
 @ObjectType()
-@Schema()
+@Schema({ timestamps: true })
 export class Post extends Document {
   @Field(() => ID)
   id: Types.ObjectId;

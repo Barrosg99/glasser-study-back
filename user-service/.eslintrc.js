@@ -29,5 +29,11 @@ module.exports = {
         caughtErrorsIgnorePattern: '^_',
       },
     ],
+    'prettier/prettier': [
+      'error',
+      {
+        endOfLine: 'auto',
+      },
+    ],
   },
 };

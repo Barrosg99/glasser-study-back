@@ -2,25 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 import { Post } from './models/post.model';
-import { CreatePostDto } from './dto/create-post.dto';
+import { SavePostDto } from './dto/save-post.dto';
 
 @Injectable()
 export class PostService {
   constructor(@InjectModel(Post.name) private postModel: Model<Post>) {}
 
-  async create(
-    createPostInput: CreatePostDto,
-    userId: Types.ObjectId,
-  ): Promise<Post> {
+  create(savePostInput: SavePostDto, userId: Types.ObjectId): Promise<Post> {
     const createdPost = new this.postModel({
-      ...createPostInput,
+      ...savePostInput,
       author: userId,
     });
 
     return createdPost.save();
   }
 
-  async findAll(userId?: Types.ObjectId): Promise<Post[]> {
+  findAll(userId?: Types.ObjectId): Promise<Post[]> {
     const query: FilterQuery<Post> = {};
     if (userId) {
       query.author = userId;
@@ -29,17 +26,31 @@ export class PostService {
     return this.postModel.find(query).sort({ updatedAt: -1 });
   }
 
-  async findOne(id: string): Promise<Post> {
+  findOne(id: string): Promise<Post> {
     return this.postModel.findById(id);
   }
 
-  // async update(id: string, updatePostInput: UpdatePostDto): Promise<Post> {
-  //   return this.postModel
-  //     .findByIdAndUpdate(id, updatePostInput, { new: true })
-  //     .exec();
-  // }
+  async update(
+    id: string,
+    userId: Types.ObjectId,
+    updatePostInput: SavePostDto,
+  ): Promise<Post> {
+    const post = await this.postModel.findOne({ _id: id, author: userId });
 
-  // async remove(id: string): Promise<Post> {
-  //   return this.postModel.findByIdAndDelete(id).exec();
-  // }
+    if (!post) throw new Error('Post not found.');
+
+    post.set(updatePostInput);
+
+    return post.save();
+  }
+
+  async remove(id: string, userId: Types.ObjectId): Promise<Post> {
+    const post = await this.postModel.findOne({ _id: id, author: userId });
+
+    if (!post) throw new Error('Post not found.');
+
+    await post.deleteOne();
+
+    return post;
+  }
 }
