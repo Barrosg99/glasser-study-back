@@ -32,20 +32,20 @@ export class PostResolver {
     return this.postService.create(createPostInput, userId);
   }
 
-  // @Query(() => [Post], { name: 'posts' })
-  // findAll() {
-  //   return this.postService.findAll();
-  // }
+  @Query(() => [Post], { name: 'posts' })
+  findAll() {
+    return this.postService.findAll();
+  }
 
-  // @Query(() => Post, { name: 'post' })
-  // findOne(@Args('id', { type: () => ID }) id: string) {
-  //   return this.postService.findOne(id);
-  // }
+  @Query(() => Post, { name: 'post' })
+  findOne(@Args('id', { type: () => ID }) id: string) {
+    return this.postService.findOne(id);
+  }
 
-  // @Query(() => [Post], { name: 'postsByAuthor' })
-  // findByAuthor(@Args('authorId', { type: () => String }) authorId: string) {
-  //   return this.postService.findByAuthor(authorId);
-  // }
+  @Query(() => [Post], { name: 'myPosts' })
+  findMyPosts(@Context('userId') userId: Types.ObjectId) {
+    return this.postService.findAll(userId);
+  }
 
   // @Mutation(() => Post)
   // updatePost(@Args('updatePostInput') updatePostInput: UpdatePostInput) {

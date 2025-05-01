@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { Post } from './models/post.model';
 import { CreatePostDto } from './dto/create-post.dto';
 
@@ -20,17 +20,18 @@ export class PostService {
     return createdPost.save();
   }
 
-  // async findAll(): Promise<Post[]> {
-  //   return this.postModel.find().exec();
-  // }
+  async findAll(userId?: Types.ObjectId): Promise<Post[]> {
+    const query: FilterQuery<Post> = {};
+    if (userId) {
+      query.author = userId;
+    }
 
-  // async findOne(id: string): Promise<Post> {
-  //   return this.postModel.findById(id).exec();
-  // }
+    return this.postModel.find(query).sort({ updatedAt: -1 });
+  }
 
-  // async findByAuthor(authorId: string): Promise<Post[]> {
-  //   return this.postModel.find({ authorId }).exec();
-  // }
+  async findOne(id: string): Promise<Post> {
+    return this.postModel.findById(id);
+  }
 
   // async update(id: string, updatePostInput: UpdatePostDto): Promise<Post> {
   //   return this.postModel
