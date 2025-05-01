@@ -48,7 +48,6 @@ export class UserService {
       userData.password = await bcrypt.hash(userData.password, saltOrRounds);
     }
 
-    // Remover campos undefined/null
     const filteredData = Object.fromEntries(
       Object.entries(userData).filter(
         ([_, value]) => value !== undefined && value !== null,
