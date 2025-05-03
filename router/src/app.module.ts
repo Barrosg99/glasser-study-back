@@ -43,7 +43,10 @@ import { ConfigModule } from '@nestjs/config';
                 const name = url.split(':')[1].split('//')[1];
                 return { name, url: `${url}` };
               })
-            : [{ name: 'users', url: 'http://localhost:4001' }],
+            : [
+                { name: 'users', url: 'http://localhost:4001/' },
+                { name: 'posts', url: 'http://localhost:4002/' },
+              ],
         }),
         buildService: ({ url }) => {
           return new RemoteGraphQLDataSource({
