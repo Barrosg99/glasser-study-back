@@ -42,6 +42,11 @@ export class UserResolver {
     return loginData;
   }
 
+  @Mutation((returns) => Boolean)
+  async resetPassword(@Args('email') email: string) {
+    return this.usersService.resetPassword(email);
+  }
+
   @ResolveReference()
   resolveReference(reference: {
     __typename: string;

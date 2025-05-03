@@ -44,8 +44,8 @@ import { ConfigModule } from '@nestjs/config';
                 return { name, url: `${url}` };
               })
             : [
-                { name: 'users', url: 'http://localhost:4001/' },
-                { name: 'posts', url: 'http://localhost:4002/' },
+                { name: 'users', url: 'http://localhost:4001' },
+                { name: 'posts', url: 'http://localhost:4002' },
               ],
         }),
         buildService: ({ url }) => {
