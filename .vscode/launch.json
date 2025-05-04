@@ -25,27 +25,6 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Gateway",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start:debug", "--", "--inspect-brk"],
-      "sourceMaps": true,
-      "cwd": "${workspaceFolder}/router",
-      "console": "internalConsole",
-      "autoAttachChildProcesses": true,
-      "restart": true,
-      "env": {
-        "NODE_ENV": "development"
-      },
-      "outputCapture": "std",
-      "skipFiles": ["<node_internals>/**"],
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-        "!**/node_modules/**"
-      ]
-    },
-    {
-      "type": "node",
-      "request": "launch",
       "name": "Debug Posts Service",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "start:debug", "--", "--inspect-brk"],
@@ -63,6 +42,38 @@
         "${workspaceFolder}/**",
         "!**/node_modules/**"
       ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Gateway",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:debug", "--", "--inspect-brk"],
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}/router",
+      "console": "internalConsole",
+      "autoAttachChildProcesses": true,
+      "restart": true,
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "outputCapture": "std",
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Start All Services",
+      "configurations": [
+        "Debug Users Service",
+        "Debug Posts Service",
+        "Debug Gateway"
+      ],
+      "stopAll": true
     }
   ]
 }
