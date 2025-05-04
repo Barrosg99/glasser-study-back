@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PostModule } from './post/post.module';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { Types } from 'mongoose';
+import { HealthController } from './app.controller';
 
 @Module({
   imports: [
@@ -43,5 +44,6 @@ import { Types } from 'mongoose';
     }),
     PostModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}
