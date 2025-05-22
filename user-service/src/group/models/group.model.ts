@@ -1,10 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument, Types } from 'mongoose';
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
 import { User } from 'src/user/models/user.model';
 
-@ObjectType()
 @Schema({ timestamps: true })
+@ObjectType()
+@Directive('@key(fields: "id")')
 export class Group extends Document {
   @Field(() => ID)
   id: Types.ObjectId;
