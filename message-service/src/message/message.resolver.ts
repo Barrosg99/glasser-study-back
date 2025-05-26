@@ -18,13 +18,26 @@ export class MessageResolver {
   constructor(private readonly messageService: MessageService) {}
 
   @ResolveField(() => User)
-  async sender(@Parent() message: Message) {
+  sender(@Parent() message: Message) {
     return { _typename: 'User', id: message.senderId };
   }
 
   @ResolveField(() => User)
-  async receiver(@Parent() message: Message) {
+  receiver(@Parent() message: Message) {
     return { _typename: 'User', id: message.receiverId };
+  }
+
+  @ResolveField(() => User)
+  group(@Parent() message: Message) {
+    return { _typename: 'Group', id: message.groupId };
+  }
+
+  @ResolveField(() => Boolean)
+  isCurrentUser(
+    @Parent() message: Message,
+    @Context('userId') userId: Types.ObjectId,
+  ) {
+    return message.senderId.equals(userId);
   }
 
   @Mutation(() => Message)
@@ -34,6 +47,13 @@ export class MessageResolver {
     @Args('id', { type: () => ID, nullable: true }) id?: string,
   ) {
     if (!userId) throw new Error('You must be logged to execute this action.');
+
+    if (
+      (!saveMessageInput.groupId && !saveMessageInput.receiverId) ||
+      (saveMessageInput.groupId && saveMessageInput.receiverId)
+    ) {
+      throw new Error('You must provide a groupId or receiverId');
+    }
 
     return this.messageService.save(id, saveMessageInput, userId);
   }
@@ -48,11 +68,23 @@ export class MessageResolver {
     return this.messageService.findOne(id);
   }
 
+  @Query(() => [Message], { name: 'groupMessages' })
+  findGroupMessages(
+    @Context('userId') userId: Types.ObjectId,
+    @Args('groupId', { type: () => ID }) groupId: Types.ObjectId,
+  ) {
+    if (!userId) throw new Error('You must be logged to execute this action.');
+
+    // precisa verificar se o usuário é membro do grupo
+
+    return this.messageService.findAll({ groupId });
+  }
+
   @Query(() => [Message], { name: 'myMessages' })
   findMyMessages(@Context('userId') userId: Types.ObjectId) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
-    return this.messageService.findAll(userId);
+    return this.messageService.findAll({ userId });
   }
 
   @Query(() => [Message], { name: 'conversation' })

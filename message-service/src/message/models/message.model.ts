@@ -26,15 +26,15 @@ export class Message extends Document {
   @Field(() => ID)
   id: Types.ObjectId;
 
-  @Field(() => User)
+  // @Field(() => User)
   @Prop({ required: true, type: Types.ObjectId })
   senderId: Types.ObjectId;
 
-  @Field(() => User)
+  // @Field(() => User)
   @Prop({ type: Types.ObjectId })
   receiverId: Types.ObjectId;
 
-  @Field(() => Group)
+  // @Field(() => Group)
   @Prop({ type: Types.ObjectId })
   groupId: Types.ObjectId;
 

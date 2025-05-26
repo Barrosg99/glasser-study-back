@@ -28,13 +28,22 @@ export class MessageService {
     return this.messageModel.create({ ...saveMessageInput, senderId });
   }
 
-  findAll(userId?: Types.ObjectId): Promise<Message[]> {
+  findAll(params?: {
+    userId?: Types.ObjectId;
+    groupId?: Types.ObjectId;
+  }): Promise<Message[]> {
+    const { userId, groupId } = params;
+
     const query: FilterQuery<Message> = {};
     if (userId) {
       query.$or = [{ senderId: userId }, { receiverId: userId }];
     }
 
-    return this.messageModel.find(query).sort({ updatedAt: -1 });
+    if (groupId) {
+      query.groupId = groupId;
+    }
+
+    return this.messageModel.find(query).sort({ createdAt: 1 });
   }
 
   findOne(id: string): Promise<Message> {
