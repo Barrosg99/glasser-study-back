@@ -75,7 +75,6 @@ export class MessageResolver {
   ) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
-    // precisa verificar se o usuário é membro do grupo
 
     return this.messageService.findAll({ groupId });
   }
