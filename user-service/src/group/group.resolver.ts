@@ -6,6 +6,7 @@ import {
   Context,
   ResolveField,
   Parent,
+  ResolveReference,
 } from '@nestjs/graphql';
 import { GroupService } from './group.service';
 import { CreateGroupDto } from './dto/create-group.dto';
@@ -65,5 +66,13 @@ export class GroupResolver {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
     return this.groupService.remove(id, userId);
+  }
+
+  @ResolveReference()
+  resolveReference(reference: {
+    __typename: string;
+    id: string;
+  }): Promise<Group> {
+    return this.groupService.findOne(reference.id);
   }
 }

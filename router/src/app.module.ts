@@ -46,6 +46,7 @@ import { ConfigModule } from '@nestjs/config';
             : [
                 { name: 'users', url: 'http://localhost:4001' },
                 { name: 'posts', url: 'http://localhost:4002' },
+                { name: 'messages', url: 'http://localhost:4003' },
               ],
         }),
         buildService: ({ url }) => {

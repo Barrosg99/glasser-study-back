@@ -46,6 +46,27 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug Message Service",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:debug", "--", "--inspect-brk"],
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}/message-service",
+      "console": "internalConsole",
+      "autoAttachChildProcesses": true,
+      "restart": true,
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "outputCapture": "std",
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Debug Gateway",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "start:debug", "--", "--inspect-brk"],
@@ -71,6 +92,7 @@
       "configurations": [
         "Debug Users Service",
         "Debug Posts Service",
+        "Debug Message Service",
         "Debug Gateway"
       ],
       "stopAll": true

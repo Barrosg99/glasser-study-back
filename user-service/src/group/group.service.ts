@@ -59,6 +59,10 @@ export class GroupService {
     return this.groupModel.find(query);
   }
 
+  async findOne(id: string): Promise<Group> {
+    return this.groupModel.findById(id);
+  }
+
   async remove(id: string, userId: Types.ObjectId) {
     const group = await this.groupModel.findOne({ _id: id, moderator: userId });
     if (!group) throw new Error('Group not found');
