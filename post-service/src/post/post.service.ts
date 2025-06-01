@@ -31,11 +31,33 @@ export class PostService {
     return this.postModel.create({ ...savePostInput, author: userId });
   }
 
-  findAll(userId?: Types.ObjectId): Promise<Post[]> {
+  findAll({
+    userId,
+    searchTerm,
+    searchFilter,
+    subject,
+  }: {
+    userId?: Types.ObjectId;
+    searchTerm?: string;
+    searchFilter?: string;
+    subject?: string;
+  }): Promise<Post[]> {
     const query: FilterQuery<Post> = {};
     if (userId) {
       query.author = userId;
     }
+
+    if (searchTerm && searchTerm.length > 3) {
+      if (searchFilter === 'all') {
+        query.title = { $regex: searchTerm, $options: 'i' };
+        query.description = { $regex: searchTerm, $options: 'i' };
+        query.tags = { $regex: searchTerm, $options: 'i' };
+      } else if (searchFilter) {
+        query[searchFilter] = { $regex: searchTerm, $options: 'i' };
+      }
+    }
+
+    if (subject) query.subject = subject;
 
     return this.postModel.find(query).sort({ updatedAt: -1 });
   }

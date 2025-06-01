@@ -39,8 +39,14 @@ export class PostResolver {
   }
 
   @Query(() => [Post], { name: 'posts' })
-  findAll() {
-    return this.postService.findAll();
+  findAll(
+    @Args('searchTerm', { type: () => String, nullable: true })
+    searchTerm?: string,
+    @Args('searchFilter', { type: () => String, nullable: true })
+    searchFilter?: string,
+    @Args('subject', { type: () => String, nullable: true }) subject?: string,
+  ) {
+    return this.postService.findAll({ searchTerm, searchFilter, subject });
   }
 
   @Query(() => Post, { name: 'post' })
@@ -52,7 +58,7 @@ export class PostResolver {
   findMyPosts(@Context('userId') userId: Types.ObjectId) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
-    return this.postService.findAll(userId);
+    return this.postService.findAll({ userId });
   }
 
   @Mutation(() => Post)
