@@ -47,11 +47,13 @@ export class PostService {
       query.author = userId;
     }
 
-    if (searchTerm && searchTerm.length > 3) {
+    if (searchTerm) {
       if (searchFilter === 'all') {
-        query.title = { $regex: searchTerm, $options: 'i' };
-        query.description = { $regex: searchTerm, $options: 'i' };
-        query.tags = { $regex: searchTerm, $options: 'i' };
+        query.$or = [
+          { title: { $regex: searchTerm, $options: 'i' } },
+          { description: { $regex: searchTerm, $options: 'i' } },
+          { tags: { $regex: searchTerm, $options: 'i' } },
+        ];
       } else if (searchFilter) {
         query[searchFilter] = { $regex: searchTerm, $options: 'i' };
       }
