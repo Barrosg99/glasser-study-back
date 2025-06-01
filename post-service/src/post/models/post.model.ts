@@ -1,5 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Directive, Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
+import {
+  Directive,
+  Field,
+  ID,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { Document, Types } from 'mongoose';
 
 export enum MaterialType {
@@ -70,7 +76,7 @@ export class Post extends Document {
   author: Types.ObjectId;
 
   @Field()
-  isAuthor: Boolean;
+  isAuthor: boolean;
 
   @Field()
   @Prop({ default: Date.now })
