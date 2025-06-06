@@ -80,6 +80,10 @@ export class Post extends Document {
   @Prop({ default: 0 })
   likesCount: number;
 
+  @Field(() => Int)
+  @Prop({ default: 0 })
+  commentsCount: number;
+
   @Field()
   isAuthor: boolean;
 
