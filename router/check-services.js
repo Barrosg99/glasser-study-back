@@ -1,10 +1,15 @@
 const http = require('http');
 
+const readyServices = new Set();
+
 const checkService = (port, serviceName) => {
   return new Promise((resolve, reject) => {
     const req = http.get(`http://localhost:${port}/health`, (res) => {
       if (res.statusCode === 200) {
-        console.log(`${serviceName} is ready!`);
+        if (!readyServices.has(serviceName)) {
+          console.log(`${serviceName} is ready!`);
+          readyServices.add(serviceName);
+        }
         resolve(true);
       } else {
         resolve(false);
