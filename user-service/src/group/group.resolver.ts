@@ -41,10 +41,13 @@ export class GroupResolver {
   }
 
   @Query((returns) => [Group])
-  myGroups(@Context('userId') userId: Types.ObjectId) {
+  myGroups(
+    @Context('userId') userId: Types.ObjectId,
+    @Args('search', { type: () => String, nullable: true }) search: string,
+  ) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
-    return this.groupService.findAll(userId);
+    return this.groupService.findAll(userId, search);
   }
 
   @Mutation((returns) => Group)

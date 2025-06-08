@@ -36,11 +36,13 @@ export class PostService {
     searchTerm,
     searchFilter,
     subject,
+    materialType,
   }: {
     userId?: Types.ObjectId;
     searchTerm?: string;
     searchFilter?: string;
     subject?: string;
+    materialType?: string;
   }): Promise<Post[]> {
     const query: FilterQuery<Post> = {};
     if (userId) {
@@ -60,6 +62,12 @@ export class PostService {
     }
 
     if (subject) query.subject = subject;
+
+    if (materialType) {
+      query.materials = {
+        $elemMatch: { type: materialType.toLowerCase() },
+      };
+    }
 
     return this.postModel.find(query).sort({ updatedAt: -1 });
   }

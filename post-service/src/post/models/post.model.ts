@@ -10,13 +10,13 @@ import {
 import { Document, Types } from 'mongoose';
 
 export enum MaterialType {
-  ARTICLE = 'article',
-  EXERCISE = 'exercise',
-  PODCAST = 'podcast',
-  SUMMARY = 'summary',
-  SIMULATOR = 'simulator',
-  VIDEO = 'video',
-  OTHER = 'other',
+  READ = 'read',
+  LISTEN = 'listen',
+  WATCH = 'watch',
+  WATCH_AND_LISTEN = 'watch_and_listen',
+  DISCUSS = 'discuss',
+  PRACTICE = 'practice',
+  TEACHING = 'teaching',
 }
 
 registerEnumType(MaterialType, { name: 'MaterialType' });
