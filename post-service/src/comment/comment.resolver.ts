@@ -27,6 +27,14 @@ export class CommentResolver {
     return { _typename: 'User', id: comment.author };
   }
 
+  @ResolveField(() => Boolean)
+  isAuthor(
+    @Parent() comment: Comment,
+    @Context('userId') userId: Types.ObjectId,
+  ) {
+    return comment.author.equals(userId);
+  }
+
   @Mutation(() => Comment)
   async createComment(
     @Context('userId') userId: Types.ObjectId,

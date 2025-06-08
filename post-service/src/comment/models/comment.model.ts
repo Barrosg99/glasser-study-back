@@ -17,6 +17,9 @@ export class Comment extends Document {
   @Prop({ type: Types.ObjectId, required: true })
   author: Types.ObjectId;
 
+  @Field()
+  isAuthor: boolean;
+
   @Field(() => ID)
   @Prop({ type: Types.ObjectId, required: true })
   post: Types.ObjectId;

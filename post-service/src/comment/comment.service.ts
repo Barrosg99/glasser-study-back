@@ -44,7 +44,7 @@ export class CommentService {
       throw new Error('Comment not found or you are not the author');
     }
 
-    await this.commentModel.deleteOne({ _id: commentId });
+    await comment.deleteOne();
     await this.postModel.updateOne(
       { _id: comment.post },
       { $inc: { commentsCount: -1 } },
