@@ -5,6 +5,7 @@ import {
   ID,
   ObjectType,
   registerEnumType,
+  Int,
 } from '@nestjs/graphql';
 import { Document, Types } from 'mongoose';
 
@@ -74,6 +75,10 @@ export class Post extends Document {
   @Field(() => User)
   @Prop({ type: Types.ObjectId })
   author: Types.ObjectId;
+
+  @Field(() => Int)
+  @Prop({ default: 0 })
+  likesCount: number;
 
   @Field()
   isAuthor: boolean;
