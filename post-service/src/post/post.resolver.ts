@@ -45,8 +45,15 @@ export class PostResolver {
     @Args('searchFilter', { type: () => String, nullable: true })
     searchFilter?: string,
     @Args('subject', { type: () => String, nullable: true }) subject?: string,
+    @Args('materialType', { type: () => String, nullable: true })
+    materialType?: string,
   ) {
-    return this.postService.findAll({ searchTerm, searchFilter, subject });
+    return this.postService.findAll({
+      searchTerm,
+      searchFilter,
+      subject,
+      materialType,
+    });
   }
 
   @Query(() => Post, { name: 'post' })

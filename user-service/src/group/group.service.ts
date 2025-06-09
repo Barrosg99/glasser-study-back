@@ -50,10 +50,14 @@ export class GroupService {
     });
   }
 
-  async findAll(userId?: Types.ObjectId): Promise<Group[]> {
+  async findAll(userId?: Types.ObjectId, search?: string): Promise<Group[]> {
     const query: FilterQuery<Group> = {};
     if (userId) {
       query.members = { $in: [userId] };
+    }
+
+    if (search) {
+      query.name = { $regex: search, $options: 'i' };
     }
 
     return this.groupModel.find(query);
