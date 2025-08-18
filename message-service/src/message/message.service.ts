@@ -30,17 +30,17 @@ export class MessageService {
 
   findAll(params?: {
     userId?: Types.ObjectId;
-    groupId?: Types.ObjectId;
+    chatId?: Types.ObjectId;
   }): Promise<Message[]> {
-    const { userId, groupId } = params;
+    const { userId, chatId } = params;
 
     const query: FilterQuery<Message> = {};
     if (userId) {
       query.$or = [{ senderId: userId }, { receiverId: userId }];
     }
 
-    if (groupId) {
-      query.groupId = groupId;
+    if (chatId) {
+      query.chatId = chatId;
     }
 
     return this.messageModel.find(query).sort({ createdAt: 1 });

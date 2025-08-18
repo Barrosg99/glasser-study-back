@@ -10,7 +10,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserModule } from './user/user.module';
 import { HealthController } from './app.controller';
-import { GroupModule } from './group/group.module';
 import { Types } from 'mongoose';
 
 @Module({
@@ -47,7 +46,6 @@ import { Types } from 'mongoose';
       path: '/',
     }),
     UserModule,
-    GroupModule,
   ],
   controllers: [HealthController],
 })

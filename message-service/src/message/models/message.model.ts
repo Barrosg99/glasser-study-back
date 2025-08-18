@@ -30,10 +30,7 @@ export class Message extends Document {
   senderId: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId })
-  receiverId: Types.ObjectId;
-
-  @Prop({ type: Types.ObjectId })
-  groupId: Types.ObjectId;
+  chatId: Types.ObjectId;
 
   @Field()
   @Prop({ required: true })
@@ -53,15 +50,3 @@ export class Message extends Document {
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);
-
-MessageSchema.pre('save', function (next) {
-  if (!this.receiverId && !this.groupId) {
-    next(new Error('A mensagem deve ter um receiverId ou um groupId'));
-  } else if (this.receiverId && this.groupId) {
-    next(
-      new Error('A mensagem não pode ter receiverId e groupId simultaneamente'),
-    );
-  } else {
-    next();
-  }
-});

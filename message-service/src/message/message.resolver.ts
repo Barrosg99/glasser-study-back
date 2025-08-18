@@ -12,24 +12,24 @@ import { MessageService } from './message.service';
 import { Message, User } from './models/message.model';
 import { SaveMessageDto } from './dto/save-message.dto';
 import { Types } from 'mongoose';
+import { Chat } from '../chat/models/chat.model';
+import { ChatService } from '../chat/chat.service';
 
 @Resolver(() => Message)
 export class MessageResolver {
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly chatService: ChatService,
+  ) {}
 
   @ResolveField(() => User)
   sender(@Parent() message: Message) {
     return { _typename: 'User', id: message.senderId };
   }
 
-  @ResolveField(() => User)
-  receiver(@Parent() message: Message) {
-    return { _typename: 'User', id: message.receiverId };
-  }
-
-  @ResolveField(() => User)
-  group(@Parent() message: Message) {
-    return { _typename: 'Group', id: message.groupId };
+  @ResolveField(() => Chat)
+  chat(@Parent() message: Message) {
+    return this.chatService.findOne(message.chatId.toString());
   }
 
   @ResolveField(() => Boolean)
@@ -68,15 +68,14 @@ export class MessageResolver {
     return this.messageService.findOne(id);
   }
 
-  @Query(() => [Message], { name: 'groupMessages' })
-  findGroupMessages(
+  @Query(() => [Message], { name: 'chatMessages' })
+  findChatMessages(
     @Context('userId') userId: Types.ObjectId,
-    @Args('groupId', { type: () => ID }) groupId: Types.ObjectId,
+    @Args('chatId', { type: () => ID }) chatId: Types.ObjectId,
   ) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
-
-    return this.messageService.findAll({ groupId });
+    return this.messageService.findAll({ chatId });
   }
 
   @Query(() => [Message], { name: 'myMessages' })

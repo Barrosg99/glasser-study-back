@@ -81,8 +81,11 @@ export class UserService {
     };
   }
 
-  async findOne(id: string | Types.ObjectId): Promise<User> {
-    return this.userModel.findById(id);
+  async findOne(params: {
+    _id?: string | Types.ObjectId;
+    email?: string;
+  }): Promise<User> {
+    return this.userModel.findOne(params);
   }
 
   async findByIds(ids: Types.ObjectId[]): Promise<User[]> {

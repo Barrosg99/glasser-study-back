@@ -19,7 +19,26 @@ export class UserResolver {
   async me(@Context('userId') userId: string) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
-    return this.usersService.findOne(userId);
+    return this.usersService.findOne({ _id: userId });
+  }
+
+  @Query((returns) => [User])
+  async user(@Args('email') email: string, @Context('userId') userId: string) {
+    if (!userId) throw new Error('You must be logged to execute this action.');
+
+    const user = await this.usersService.findOne({ email });
+
+    if (!user) throw new Error('User not found.');
+    
+    if (user.id.toString() !== userId) {
+      Object.keys(user).forEach((key) => {
+        if (!['id', 'name', 'email'].includes(key)) {
+          delete user[key];
+        }
+      });
+    }
+
+    return user;
   }
 
   @Mutation((returns) => User)
@@ -52,6 +71,6 @@ export class UserResolver {
     __typename: string;
     id: string;
   }): Promise<User> {
-    return this.usersService.findOne(reference.id);
+    return this.usersService.findOne({ _id: reference.id });
   }
 }
