@@ -13,7 +13,7 @@ export class ChatService {
     userId: Types.ObjectId,
     id: string,
   ): Promise<Chat> {
-    const { memberIds } = chat;
+    const { membersIds } = chat;
 
     // const members = await this.userModel.find({
     //   _id: { $in: memberIds },
@@ -34,7 +34,7 @@ export class ChatService {
 
       updateChat.name = chat.name;
       updateChat.description = chat.description;
-      updateChat.members = [userId, ...memberIds];
+      updateChat.members = [userId, ...membersIds];
 
       return updateChat.save();
     }
@@ -42,7 +42,7 @@ export class ChatService {
     return this.chatModel.create({
       ...chat,
       moderator: userId,
-      members: [userId, ...memberIds],
+      members: [userId, ...membersIds],
     });
   }
 

@@ -10,5 +10,5 @@ export class CreateChatDto {
   readonly description: string;
 
   @Field(() => [String], { nullable: true })
-  readonly memberIds?: Types.ObjectId[];
+  readonly membersIds?: Types.ObjectId[];
 }
