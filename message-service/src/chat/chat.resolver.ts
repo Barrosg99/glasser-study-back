@@ -10,22 +10,23 @@ import {
 } from '@nestjs/graphql';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
-import { Chat } from './models/chat.model';
+import { Chat, Member } from './models/chat.model';
 import { Types } from 'mongoose';
-import { User } from 'src/message/models/message.model';
 
 @Resolver((of) => Chat)
 export class ChatResolver {
   constructor(private readonly chatService: ChatService) {}
 
-  @ResolveField(() => [User])
+  @ResolveField(() => [Member])
   members(@Parent() chat: Chat) {
-    return chat.members.map((member) => ({ _typename: 'User', id: member }));
-  }
+    const members = [...chat.members, ...chat.invitedMembers];
 
-  @ResolveField(() => User)
-  moderator(@Parent() chat: Chat) {
-    return { _typename: 'User', id: chat.moderator };
+    return members.map((member) => ({
+      _typename: 'Member',
+      user: { _typename: 'User', id: member },
+      isInvited: !!chat.invitedMembers.find((id) => id.equals(member)),
+      isModerator: chat.moderator.equals(member),
+    }));
   }
 
   @ResolveField(() => Boolean)
@@ -62,6 +63,16 @@ export class ChatResolver {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
     return this.chatService.remove(id, userId);
+  }
+
+  @Mutation((returns) => Chat)
+  acceptInvitation(
+    @Context('userId') userId: Types.ObjectId,
+    @Args('id', { type: () => String }) id: string,
+  ) {
+    if (!userId) throw new Error('You must be logged to execute this action.');
+
+    return this.chatService.acceptInvitation(id, userId);
   }
 
   @ResolveReference()

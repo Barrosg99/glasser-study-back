@@ -13,7 +13,7 @@ export class ChatService {
     userId: Types.ObjectId,
     id: string,
   ): Promise<Chat> {
-    const { membersIds } = chat;
+    const membersIds = chat.membersIds?.map((id) => new Types.ObjectId(id));
 
     // const members = await this.userModel.find({
     //   _id: { $in: memberIds },
@@ -32,9 +32,26 @@ export class ChatService {
       // if (!members.find((member) => member._id.equals(updateChat.moderator)))
       //   throw new Error('You cannot remove the moderator from this chat.');
 
+      const { members, invitedMembers } = updateChat;
+
+      const allMembers = [...members, ...invitedMembers];
+      const newMembers = membersIds.filter(
+        (id) => !allMembers.find((member) => member.equals(id)),
+      );
+      const removeMembers = allMembers.filter(
+        (id) => !membersIds.find((member) => member.equals(id)),
+      );
+
+      const newInvitedMembers = [...invitedMembers, ...newMembers].filter(
+        (id) => !removeMembers.find((member) => member.equals(id)),
+      );
+
       updateChat.name = chat.name;
       updateChat.description = chat.description;
-      updateChat.members = [userId, ...membersIds];
+      updateChat.members = members.filter(
+        (id) => !removeMembers.find((member) => member.equals(id)),
+      );
+      updateChat.invitedMembers = newInvitedMembers;
 
       return updateChat.save();
     }
@@ -42,7 +59,8 @@ export class ChatService {
     return this.chatModel.create({
       ...chat,
       moderator: userId,
-      members: [userId, ...membersIds],
+      members: [userId],
+      invitedMembers: membersIds,
     });
   }
 
@@ -69,5 +87,20 @@ export class ChatService {
 
     await this.chatModel.deleteOne({ _id: id });
     return chat;
+  }
+
+  async acceptInvitation(id: string, userId: Types.ObjectId) {
+    const chat = await this.chatModel.findOne({
+      _id: id,
+      invitedMembers: userId,
+    });
+    if (!chat) throw new Error('Chat not found');
+
+    chat.members.push(userId);
+    chat.invitedMembers = chat.invitedMembers.filter(
+      (id) => id.toString() !== userId.toString(),
+    );
+
+    return chat.save();
   }
 }

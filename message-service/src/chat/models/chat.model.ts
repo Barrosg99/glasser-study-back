@@ -3,6 +3,18 @@ import { Document, HydratedDocument, Types } from 'mongoose';
 import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
 import { User } from 'src/message/models/message.model';
 
+@ObjectType()
+export class Member {
+  @Field(() => User)
+  user: Types.ObjectId;
+
+  @Field(() => Boolean)
+  isInvited: boolean;
+
+  @Field(() => Boolean)
+  isModerator: boolean;
+}
+
 @Schema({ timestamps: true })
 @ObjectType()
 @Directive('@key(fields: "id")')
@@ -18,16 +30,18 @@ export class Chat extends Document {
   @Prop({ required: true })
   description: string;
 
-  @Field(() => User)
   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
   moderator: Types.ObjectId;
 
   @Field(() => Boolean)
   isModerator: boolean;
 
-  @Field(() => [User])
+  @Field(() => [Member])
   @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
   members: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
+  invitedMembers: Types.ObjectId[];
 
   @Field(() => Date)
   createdAt: Date;

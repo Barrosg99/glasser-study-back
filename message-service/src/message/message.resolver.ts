@@ -49,10 +49,10 @@ export class MessageResolver {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
     if (
-      (!saveMessageInput.groupId && !saveMessageInput.receiverId) ||
-      (saveMessageInput.groupId && saveMessageInput.receiverId)
+      (!saveMessageInput.chatId && !saveMessageInput.receiverId) ||
+      (saveMessageInput.chatId && saveMessageInput.receiverId)
     ) {
-      throw new Error('You must provide a groupId or receiverId');
+      throw new Error('You must provide a chatId or receiverId');
     }
 
     return this.messageService.save(id, saveMessageInput, userId);
