@@ -34,7 +34,7 @@ export class UserService {
     return createdUser;
   }
 
-  async edit(userData: CreateUserDto, userId: string): Promise<User> {
+  async edit(userData: CreateUserDto, userId: Types.ObjectId): Promise<User> {
     const { email, password } = userData;
 
     if (email) {
@@ -82,7 +82,7 @@ export class UserService {
   }
 
   async findOne(params: {
-    _id?: string | Types.ObjectId;
+    _id?: Types.ObjectId;
     email?: string;
   }): Promise<User> {
     return this.userModel.findOne(params);
