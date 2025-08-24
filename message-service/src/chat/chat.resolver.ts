@@ -34,6 +34,11 @@ export class ChatResolver {
     return chat.moderator.equals(userId);
   }
 
+  @ResolveField(() => Boolean)
+  isInvited(@Parent() chat: Chat, @Context('userId') userId: Types.ObjectId) {
+    return chat.invitedMembers.includes(userId);
+  }
+
   @Query((returns) => [Chat])
   myChats(
     @Context('userId') userId: Types.ObjectId,
@@ -65,14 +70,24 @@ export class ChatResolver {
     return this.chatService.remove(id, userId);
   }
 
-  @Mutation((returns) => Chat)
-  acceptInvitation(
+  @Mutation((returns) => Boolean)
+  manageInvitation(
+    @Context('userId') userId: Types.ObjectId,
+    @Args('id', { type: () => String }) id: string,
+    @Args('accept', { type: () => Boolean }) accept: boolean,
+  ) {
+    if (!userId) throw new Error('You must be logged to execute this action.');
+
+    return this.chatService.manageInvitation(id, userId, accept);
+  }
+
+  @Mutation((returns) => Boolean)
+  exitChat(
     @Context('userId') userId: Types.ObjectId,
     @Args('id', { type: () => String }) id: string,
   ) {
     if (!userId) throw new Error('You must be logged to execute this action.');
-
-    return this.chatService.acceptInvitation(id, userId);
+    return this.chatService.exitChat(id, userId);
   }
 
   @ResolveReference()

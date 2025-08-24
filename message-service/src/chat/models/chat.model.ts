@@ -36,6 +36,9 @@ export class Chat extends Document {
   @Field(() => Boolean)
   isModerator: boolean;
 
+  @Field(() => Boolean)
+  isInvited: boolean;
+
   @Field(() => [Member])
   @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
   members: Types.ObjectId[];

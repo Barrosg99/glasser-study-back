@@ -67,7 +67,10 @@ export class ChatService {
   async findAll(userId?: Types.ObjectId, search?: string): Promise<Chat[]> {
     const query: FilterQuery<Chat> = {};
     if (userId) {
-      query.members = { $in: [userId] };
+      query.$or = [
+        { members: { $in: [userId] } },
+        { invitedMembers: { $in: [userId] } },
+      ];
     }
 
     if (search) {
@@ -89,18 +92,34 @@ export class ChatService {
     return chat;
   }
 
-  async acceptInvitation(id: string, userId: Types.ObjectId) {
+  async manageInvitation(id: string, userId: Types.ObjectId, accept: boolean) {
     const chat = await this.chatModel.findOne({
       _id: id,
       invitedMembers: userId,
     });
     if (!chat) throw new Error('Chat not found');
 
-    chat.members.push(userId);
-    chat.invitedMembers = chat.invitedMembers.filter(
-      (id) => id.toString() !== userId.toString(),
-    );
+    if (accept) {
+      chat.members.push(userId);
+      chat.invitedMembers = chat.invitedMembers.filter(
+        (id) => id.toString() !== userId.toString(),
+      );
+    } else {
+      chat.invitedMembers = chat.invitedMembers.filter(
+        (id) => id.toString() !== userId.toString(),
+      );
+    }
 
-    return chat.save();
+    await chat.save();
+    return accept;
+  }
+
+  async exitChat(id: string, userId: Types.ObjectId) {
+    const chat = await this.chatModel.findOne({ _id: id, members: userId });
+    if (!chat) throw new Error('Chat not found');
+
+    chat.members = chat.members.filter((id) => id.toString() !== userId.toString());
+    await chat.save();
+    return true;
   }
 }
