@@ -95,7 +95,8 @@
         "Debug Message Service",
         "Debug Gateway"
       ],
-      "stopAll": true
+      "stopAll": true,
+      "preLaunchTask": "start-containers"
     }
   ]
 }
