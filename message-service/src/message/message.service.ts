@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+
 import { Message } from './models/message.model';
 import { SaveMessageDto } from './dto/save-message.dto';
+import { Chat } from 'src/chat/models/chat.model';
 
 @Injectable()
 export class MessageService {
   constructor(
     @InjectModel(Message.name) private messageModel: Model<Message>,
+    @InjectModel(Chat.name) private chatModel: Model<Chat>,
+    private readonly amqpConnection: AmqpConnection,
   ) {}
 
   async save(
@@ -15,17 +20,39 @@ export class MessageService {
     saveMessageInput: SaveMessageDto,
     senderId: Types.ObjectId,
   ): Promise<Message> {
-    if (id) {
-      const message = await this.messageModel.findOne({ _id: id, senderId });
+    // if (id) {
+    //   const message = await this.messageModel.findOne({ _id: id, senderId });
 
-      if (!message) throw new Error('Message not found.');
+    //   if (!message) throw new Error('Message not found.');
 
-      message.set(saveMessageInput);
+    //   message.set(saveMessageInput);
 
-      return message.save();
-    }
+    //   return message.save();
+    // }
 
-    return this.messageModel.create({ ...saveMessageInput, senderId });
+    const message = await this.messageModel.create({
+      ...saveMessageInput,
+      senderId,
+    });
+
+    const chat = await this.chatModel.findById(saveMessageInput.chatId);
+    const otherMembers = chat.members.filter(
+      (member) => member.toString() !== senderId.toString(),
+    );
+
+    otherMembers.forEach(async (member) => {
+      await this.amqpConnection.publish(
+        'notifications_exchange',
+        'notification.created',
+        {
+          userId: member._id.toString(),
+          message: 'Você tem uma nova mensangem',
+          type: 'info',
+        },
+      );
+    });
+
+    return message;
   }
 
   findAll(params?: {

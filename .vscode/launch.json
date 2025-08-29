@@ -84,7 +84,28 @@
         "${workspaceFolder}/**",
         "!**/node_modules/**"
       ]
-    }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Notification Service",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:debug", "--", "--inspect-brk"],
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}/notification-service",
+      "console": "internalConsole",
+      "autoAttachChildProcesses": true,
+      "restart": true,
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "outputCapture": "std",
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
   ],
   "compounds": [
     {

@@ -22,6 +22,7 @@
   "dependencies": {
     "@apollo/server": "4.10.5",
     "@apollo/subgraph": "2.2.3",
+    "@golevelup/nestjs-rabbitmq": "^6.0.2",
     "@nestjs/apollo": "12.2.0",
     "@nestjs/common": "10.0.0",
     "@nestjs/config": "3.2.3",
