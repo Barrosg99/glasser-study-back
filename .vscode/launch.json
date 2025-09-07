@@ -105,7 +105,7 @@
         "${workspaceFolder}/**",
         "!**/node_modules/**"
       ]
-    },
+    }
   ],
   "compounds": [
     {
@@ -114,6 +114,7 @@
         "Debug Users Service",
         "Debug Posts Service",
         "Debug Message Service",
+        "Debug Notification Service",
         "Debug Gateway"
       ],
       "stopAll": true,

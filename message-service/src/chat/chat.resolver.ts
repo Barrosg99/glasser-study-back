@@ -19,7 +19,10 @@ export class ChatResolver {
 
   @ResolveField(() => [Member])
   members(@Parent() chat: Chat) {
-    const members = [...chat.members, ...chat.invitedMembers];
+    const members = [
+      ...chat.members.map((member) => member.user),
+      ...chat.invitedMembers,
+    ];
 
     return members.map((member) => ({
       _typename: 'Member',
@@ -37,6 +40,11 @@ export class ChatResolver {
   @ResolveField(() => Boolean)
   isInvited(@Parent() chat: Chat, @Context('userId') userId: Types.ObjectId) {
     return chat.invitedMembers.includes(userId);
+  }
+
+  @ResolveField(() => Boolean)
+  hasRead(@Parent() chat: Chat, @Context('userId') userId: Types.ObjectId) {
+    return !!chat.members.find((member) => member.user.equals(userId))?.hasRead;
   }
 
   @Query((returns) => [Chat])

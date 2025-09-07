@@ -9,7 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { NotificationModule } from './notification/notification.module';
-
+import { HealthController } from './app.controller';
 
 @Module({
   imports: [
@@ -56,29 +56,30 @@ import { NotificationModule } from './notification/notification.module';
           onConnect: (context: Context<any>) => {
             const { connectionParams, extra } = context as any;
 
-            const jwtService = new JwtService({
-              secret: process.env.JWT_SECRET,
-            });
-
-            const authHeader = connectionParams.Authorization;
-
-            if (authHeader) {
-              const token = authHeader;
-              try {
-                const decoded = jwtService.verify(token);
-                extra.userId = decoded.user.id;
-              } catch (err) {
-                throw new Error('Token Inválido');
-              }
-            }
+            extra.authHeader = connectionParams.Authorization;
           },
         },
       },
-      context: ({ extra }) => {
-        return { userId: extra?.userId };
+      context: ({ extra, req }) => {
+        const jwtService = new JwtService({
+          secret: process.env.JWT_SECRET,
+        });
+
+        const authHeader = req?.headers.authorization || extra?.authHeader;
+
+        if (authHeader) {
+          const token = authHeader;
+          try {
+            const decoded = jwtService.verify(token);
+            return { userId: decoded.user.id };
+          } catch (err) {
+            throw new Error('Token Inválido');
+          }
+        }
       },
     }),
     NotificationModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

@@ -37,16 +37,21 @@ export class MessageService {
 
     const chat = await this.chatModel.findById(saveMessageInput.chatId);
     const otherMembers = chat.members.filter(
-      (member) => member.toString() !== senderId.toString(),
+      (member) => member.user.toString() !== senderId.toString(),
     );
 
     otherMembers.forEach(async (member) => {
+      await this.chatModel.updateOne(
+        { _id: chat._id, 'members.user': member.user },
+        { $set: { 'members.$.hasRead': false } },
+      );
+
       await this.amqpConnection.publish(
         'notifications_exchange',
         'notification.created',
         {
-          userId: member._id.toString(),
-          message: 'Você tem uma nova mensangem',
+          userId: member.user.toString(),
+          message: 'NEW_MESSAGE',
           type: 'info',
         },
       );
@@ -55,19 +60,29 @@ export class MessageService {
     return message;
   }
 
-  findAll(params?: {
+  async findAll(params?: {
     userId?: Types.ObjectId;
     chatId?: Types.ObjectId;
   }): Promise<Message[]> {
     const { userId, chatId } = params;
 
     const query: FilterQuery<Message> = {};
-    if (userId) {
-      query.$or = [{ senderId: userId }, { receiverId: userId }];
-    }
-
+    // verificar se o userId é um membro do chat
     if (chatId) {
-      query.chatId = chatId;
+      const chat = await this.chatModel.findById(chatId);
+      const isMember = chat.members.find((member) =>
+        member.user.equals(userId),
+      );
+      if (isMember) {
+        query.chatId = chatId;
+        // update the member has read to true
+        await this.chatModel.updateOne(
+          { _id: chatId, 'members.user': userId },
+          { $set: { 'members.$.hasRead': true } },
+        );
+      } else {
+        throw new Error('You are not a member of this chat.');
+      }
     }
 
     return this.messageModel.find(query).sort({ createdAt: 1 });

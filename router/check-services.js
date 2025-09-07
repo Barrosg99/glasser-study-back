@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const http = require('http');
 
 const readyServices = new Set();
 
 const checkService = (port, serviceName) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const req = http.get(`http://localhost:${port}/health`, (res) => {
       if (res.statusCode === 200) {
         if (!readyServices.has(serviceName)) {
@@ -26,8 +27,14 @@ const waitForServices = async () => {
     const userServiceReady = await checkService(4001, 'users');
     const postServiceReady = await checkService(4002, 'posts');
     const messageServiceReady = await checkService(4003, 'messages');
+    const notificationServiceReady = await checkService(4004, 'notifications');
 
-    if (userServiceReady && postServiceReady && messageServiceReady) {
+    if (
+      userServiceReady &&
+      postServiceReady &&
+      messageServiceReady &&
+      notificationServiceReady
+    ) {
       console.log('All services are ready!');
       process.exit(0);
     }
