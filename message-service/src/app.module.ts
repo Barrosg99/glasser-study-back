@@ -11,7 +11,6 @@ import { Types } from 'mongoose';
 
 import { MessageModule } from './message/message.module';
 import { ChatModule } from './chat/chat.module';
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 
 import { HealthController } from './app.controller';
 

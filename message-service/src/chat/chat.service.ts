@@ -3,10 +3,11 @@ import { CreateChatDto } from './dto/create-chat.dto';
 import { Chat } from './models/chat.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class ChatService {
-  constructor(@InjectModel(Chat.name) private chatModel: Model<Chat>) {}
+  constructor(@InjectModel(Chat.name) private chatModel: Model<Chat>, private readonly amqpConnection: AmqpConnection) {}
 
   async save(
     chat: CreateChatDto,
@@ -53,7 +54,31 @@ export class ChatService {
       );
       updateChat.invitedMembers = newInvitedMembers;
 
+      for (const memberId of newMembers) {
+        await this.amqpConnection.publish(
+          'notifications_exchange',
+          'notification.created',
+          {
+            userId: memberId.toString(),
+            message: 'NEW_CHAT',
+            type: 'info',
+          },
+        );
+      }
+
       return updateChat.save();
+    }
+
+    for (const memberId of membersIds) {
+      await this.amqpConnection.publish(
+        'notifications_exchange',
+        'notification.created',
+        {
+          userId: memberId.toString(),
+          message: 'NEW_CHAT',
+          type: 'info',
+        },
+      );
     }
 
     return this.chatModel.create({

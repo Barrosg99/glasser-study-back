@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Comment } from './models/comment.model';
 import { Post } from '../post/models/post.model';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class CommentService {
   constructor(
     @InjectModel(Comment.name) private commentModel: Model<Comment>,
     @InjectModel(Post.name) private postModel: Model<Post>,
+    private readonly amqpConnection: AmqpConnection,
   ) {}
 
   async createComment(
@@ -22,10 +24,21 @@ export class CommentService {
       content,
     });
 
-    await this.postModel.updateOne(
-      { _id: postId },
-      { $inc: { commentsCount: 1 } },
-    );
+    const post = await this.postModel.findById(postId);
+
+    if(!post.author.equals(userId)) {
+      await this.amqpConnection.publish(
+        'notifications_exchange',
+        'notification.created',
+        {
+          userId: post.author,
+          message: 'NEW_COMMENT',
+          type: 'info',
+        },
+      );
+    }
+      post.commentsCount++;
+      await post.save();
 
     return comment;
   }

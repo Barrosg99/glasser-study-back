@@ -11,6 +11,15 @@ export enum Type {
 
 registerEnumType(Type, { name: 'Type' });
 
+export enum Message {
+  NEW_MESSAGE = 'NEW_MESSAGE',
+  NEW_CHAT = 'NEW_CHAT',
+  NEW_COMMENT = 'NEW_COMMENT',
+  NEW_LIKE = 'NEW_LIKE',
+}
+
+registerEnumType(Message, { name: 'Message' });
+
 @ObjectType()
 @Schema({ timestamps: true })
 export class Notification extends Document {
@@ -21,9 +30,9 @@ export class Notification extends Document {
   @Prop({ required: true })
   userId: string;
 
-  @Field()
-  @Prop({ required: true })
-  message: string;
+  @Field(() => Message)
+  @Prop({ required: true, enum: Object.values(Message) })
+  message: Message;
 
   @Field(() => Type)
   @Prop({ required: true, enum: Object.values(Type) })

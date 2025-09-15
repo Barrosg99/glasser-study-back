@@ -11,6 +11,8 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { Types } from 'mongoose';
 import { HealthController } from './app.controller';
 import { LikeModule } from './like/like.module';
+import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
