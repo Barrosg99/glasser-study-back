@@ -9,6 +9,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserModule } from './user/user.module';
+import { GoalsModule } from './goals/goals.module';
 import { HealthController } from './app.controller';
 import { Types } from 'mongoose';
 
@@ -46,6 +47,7 @@ import { Types } from 'mongoose';
       path: '/',
     }),
     UserModule,
+    GoalsModule,
   ],
   controllers: [HealthController],
 })
