@@ -3,10 +3,11 @@ import { CreateChatDto } from './dto/create-chat.dto';
 import { Chat } from './models/chat.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class ChatService {
-  constructor(@InjectModel(Chat.name) private chatModel: Model<Chat>) {}
+  constructor(@InjectModel(Chat.name) private chatModel: Model<Chat>, private readonly amqpConnection: AmqpConnection) {}
 
   async save(
     chat: CreateChatDto,
@@ -34,7 +35,7 @@ export class ChatService {
 
       const { members, invitedMembers } = updateChat;
 
-      const allMembers = [...members, ...invitedMembers];
+      const allMembers = [...members.map((member) => member.user), ...invitedMembers];
       const newMembers = membersIds.filter(
         (id) => !allMembers.find((member) => member.equals(id)),
       );
@@ -49,17 +50,41 @@ export class ChatService {
       updateChat.name = chat.name;
       updateChat.description = chat.description;
       updateChat.members = members.filter(
-        (id) => !removeMembers.find((member) => member.equals(id)),
+        (id) => !removeMembers.find((member) => member.equals(id.user)),
       );
       updateChat.invitedMembers = newInvitedMembers;
 
+      for (const memberId of newMembers) {
+        await this.amqpConnection.publish(
+          'notifications_exchange',
+          'notification.created',
+          {
+            userId: memberId.toString(),
+            message: 'NEW_CHAT',
+            type: 'info',
+          },
+        );
+      }
+
       return updateChat.save();
+    }
+
+    for (const memberId of membersIds) {
+      await this.amqpConnection.publish(
+        'notifications_exchange',
+        'notification.created',
+        {
+          userId: memberId.toString(),
+          message: 'NEW_CHAT',
+          type: 'info',
+        },
+      );
     }
 
     return this.chatModel.create({
       ...chat,
       moderator: userId,
-      members: [userId],
+      members: [{ user: userId, hasRead: true }],
       invitedMembers: membersIds,
     });
   }
@@ -68,8 +93,8 @@ export class ChatService {
     const query: FilterQuery<Chat> = {};
     if (userId) {
       query.$or = [
-        { members: { $in: [userId] } },
-        { invitedMembers: { $in: [userId] } },
+        { 'members.user': userId },
+        { invitedMembers: userId },
       ];
     }
 
@@ -100,7 +125,7 @@ export class ChatService {
     if (!chat) throw new Error('Chat not found');
 
     if (accept) {
-      chat.members.push(userId);
+      chat.members.push({ user: userId, hasRead: false });
       chat.invitedMembers = chat.invitedMembers.filter(
         (id) => id.toString() !== userId.toString(),
       );
@@ -115,7 +140,7 @@ export class ChatService {
   }
 
   async exitChat(id: string, userId: Types.ObjectId) {
-    const chat = await this.chatModel.findOne({ _id: id, members: userId });
+    const chat = await this.chatModel.findOne({ _id: id, members: { user: userId } });
     if (!chat) throw new Error('Chat not found');
 
     chat.members = chat.members.filter((id) => id.toString() !== userId.toString());

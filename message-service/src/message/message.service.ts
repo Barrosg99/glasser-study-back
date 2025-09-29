@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+
 import { Message } from './models/message.model';
 import { SaveMessageDto } from './dto/save-message.dto';
+import { Chat } from 'src/chat/models/chat.model';
 
 @Injectable()
 export class MessageService {
   constructor(
     @InjectModel(Message.name) private messageModel: Model<Message>,
+    @InjectModel(Chat.name) private chatModel: Model<Chat>,
+    private readonly amqpConnection: AmqpConnection,
   ) {}
 
   async save(
@@ -15,32 +20,69 @@ export class MessageService {
     saveMessageInput: SaveMessageDto,
     senderId: Types.ObjectId,
   ): Promise<Message> {
-    if (id) {
-      const message = await this.messageModel.findOne({ _id: id, senderId });
+    // if (id) {
+    //   const message = await this.messageModel.findOne({ _id: id, senderId });
 
-      if (!message) throw new Error('Message not found.');
+    //   if (!message) throw new Error('Message not found.');
 
-      message.set(saveMessageInput);
+    //   message.set(saveMessageInput);
 
-      return message.save();
-    }
+    //   return message.save();
+    // }
 
-    return this.messageModel.create({ ...saveMessageInput, senderId });
+    const message = await this.messageModel.create({
+      ...saveMessageInput,
+      senderId,
+    });
+
+    const chat = await this.chatModel.findById(saveMessageInput.chatId);
+    const otherMembers = chat.members.filter(
+      (member) => member.user.toString() !== senderId.toString(),
+    );
+
+    otherMembers.forEach(async (member) => {
+      await this.chatModel.updateOne(
+        { _id: chat._id, 'members.user': member.user },
+        { $set: { 'members.$.hasRead': false } },
+      );
+
+      await this.amqpConnection.publish(
+        'notifications_exchange',
+        'notification.created',
+        {
+          userId: member.user.toString(),
+          message: 'NEW_MESSAGE',
+          type: 'info',
+        },
+      );
+    });
+
+    return message;
   }
 
-  findAll(params?: {
+  async findAll(params?: {
     userId?: Types.ObjectId;
     chatId?: Types.ObjectId;
   }): Promise<Message[]> {
     const { userId, chatId } = params;
 
     const query: FilterQuery<Message> = {};
-    if (userId) {
-      query.$or = [{ senderId: userId }, { receiverId: userId }];
-    }
-
+    // verificar se o userId é um membro do chat
     if (chatId) {
-      query.chatId = chatId;
+      const chat = await this.chatModel.findById(chatId);
+      const isMember = chat.members.find((member) =>
+        member.user.equals(userId),
+      );
+      if (isMember) {
+        query.chatId = chatId;
+        // update the member has read to true
+        await this.chatModel.updateOne(
+          { _id: chatId, 'members.user': userId },
+          { $set: { 'members.$.hasRead': true } },
+        );
+      } else {
+        throw new Error('You are not a member of this chat.');
+      }
     }
 
     return this.messageModel.find(query).sort({ createdAt: 1 });

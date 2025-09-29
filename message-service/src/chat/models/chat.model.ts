@@ -15,6 +15,12 @@ export class Member {
   isModerator: boolean;
 }
 
+@Schema()
+export class MongoMembers {
+  user: Types.ObjectId;
+  hasRead: boolean;
+}
+
 @Schema({ timestamps: true })
 @ObjectType()
 @Directive('@key(fields: "id")')
@@ -40,10 +46,10 @@ export class Chat extends Document {
   isInvited: boolean;
 
   @Field(() => [Member])
-  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
-  members: Types.ObjectId[];
+  @Prop({ type: [MongoMembers], default: [] })
+  members: MongoMembers[];
 
-  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
+  @Prop({ type: [Types.ObjectId], default: [] })
   invitedMembers: Types.ObjectId[];
 
   @Field(() => Date)

@@ -75,7 +75,7 @@ export class MessageResolver {
   ) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
-    return this.messageService.findAll({ chatId });
+    return this.messageService.findAll({ chatId, userId });
   }
 
   @Query(() => [Message], { name: 'myMessages' })
