@@ -34,7 +34,7 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Field(() => UserGoal)
+  @Field(() => UserGoal, { nullable: true })
   @Prop({
     type: String,
     required: true,
@@ -43,10 +43,10 @@ export class User {
   })
   goal: UserGoal;
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   createdAt: Date;
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   updatedAt: Date;
 }
 

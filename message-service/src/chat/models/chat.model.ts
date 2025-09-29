@@ -1,12 +1,24 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument, Types } from 'mongoose';
 import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
-import { User } from 'src/user/models/user.model';
+import { User } from 'src/message/models/message.model';
+
+@ObjectType()
+export class Member {
+  @Field(() => User)
+  user: Types.ObjectId;
+
+  @Field(() => Boolean)
+  isInvited: boolean;
+
+  @Field(() => Boolean)
+  isModerator: boolean;
+}
 
 @Schema({ timestamps: true })
 @ObjectType()
 @Directive('@key(fields: "id")')
-export class Group extends Document {
+export class Chat extends Document {
   @Field(() => ID)
   id: Types.ObjectId;
 
@@ -18,16 +30,21 @@ export class Group extends Document {
   @Prop({ required: true })
   description: string;
 
-  @Field(() => User)
   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
   moderator: Types.ObjectId;
 
   @Field(() => Boolean)
   isModerator: boolean;
 
-  @Field(() => [User])
+  @Field(() => Boolean)
+  isInvited: boolean;
+
+  @Field(() => [Member])
   @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
   members: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
+  invitedMembers: Types.ObjectId[];
 
   @Field(() => Date)
   createdAt: Date;
@@ -36,5 +53,5 @@ export class Group extends Document {
   updatedAt: Date;
 }
 
-export type GroupDocument = HydratedDocument<Group>;
-export const GroupSchema = SchemaFactory.createForClass(Group);
+export type ChatDocument = HydratedDocument<Chat>;
+export const ChatSchema = SchemaFactory.createForClass(Chat);

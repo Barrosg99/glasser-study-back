@@ -34,7 +34,7 @@ export class UserService {
     return createdUser;
   }
 
-  async edit(userData: CreateUserDto, userId: string): Promise<User> {
+  async edit(userData: CreateUserDto, userId: Types.ObjectId): Promise<User> {
     const { email, password } = userData;
 
     if (email) {
@@ -81,8 +81,11 @@ export class UserService {
     };
   }
 
-  async findOne(id: string | Types.ObjectId): Promise<User> {
-    return this.userModel.findById(id);
+  async findOne(params: {
+    _id?: Types.ObjectId;
+    email?: string;
+  }): Promise<User> {
+    return this.userModel.findOne(params);
   }
 
   async findByIds(ids: Types.ObjectId[]): Promise<User[]> {

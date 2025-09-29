@@ -1,7 +1,8 @@
 import { Field, InputType } from '@nestjs/graphql';
+import { Types } from 'mongoose';
 
 @InputType()
-export class CreateGroupDto {
+export class CreateChatDto {
   @Field()
   readonly name: string;
 
@@ -9,5 +10,5 @@ export class CreateGroupDto {
   readonly description: string;
 
   @Field(() => [String], { nullable: true })
-  readonly memberEmails?: string[];
+  readonly membersIds?: Types.ObjectId[];
 }

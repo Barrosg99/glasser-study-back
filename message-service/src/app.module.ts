@@ -8,7 +8,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { Types } from 'mongoose';
+
 import { MessageModule } from './message/message.module';
+import { ChatModule } from './chat/chat.module';
+
 import { HealthController } from './app.controller';
 
 @Module({
@@ -43,6 +46,7 @@ import { HealthController } from './app.controller';
       inject: [ConfigService],
     }),
     MessageModule,
+    ChatModule,
   ],
   controllers: [HealthController],
 })

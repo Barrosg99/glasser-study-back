@@ -6,7 +6,7 @@ export class SaveMessageDto {
   readonly receiverId: string;
 
   @Field({ nullable: true })
-  readonly groupId: string;
+  readonly chatId: string;
 
   @Field()
   readonly content: string;
