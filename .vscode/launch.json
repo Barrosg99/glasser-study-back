@@ -67,6 +67,27 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug Reports Service",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:debug", "--", "--inspect-brk"],
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}/report-service",
+      "console": "internalConsole",
+      "autoAttachChildProcesses": true,
+      "restart": true,
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "outputCapture": "std",
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Debug Gateway",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "start:debug", "--", "--inspect-brk"],
@@ -114,6 +135,7 @@
         "Debug Users Service",
         "Debug Posts Service",
         "Debug Message Service",
+        "Debug Reports Service",
         "Debug Notification Service",
         "Debug Gateway"
       ],

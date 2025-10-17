@@ -28,12 +28,14 @@ const waitForServices = async () => {
     const postServiceReady = await checkService(4002, 'posts');
     const messageServiceReady = await checkService(4003, 'messages');
     const notificationServiceReady = await checkService(4004, 'notifications');
+    const reportServiceReady = await checkService(4005, 'reports');
 
     if (
       userServiceReady &&
       postServiceReady &&
       messageServiceReady &&
-      notificationServiceReady
+      notificationServiceReady &&
+      reportServiceReady
     ) {
       console.log('All services are ready!');
       process.exit(0);
