@@ -72,6 +72,10 @@ export class PostService {
     return this.postModel.find(query).sort({ updatedAt: -1 });
   }
 
+  countPosts(): Promise<number> {
+    return this.postModel.countDocuments();
+  }
+
   findOne(id: string): Promise<Post> {
     return this.postModel.findById(id);
   }

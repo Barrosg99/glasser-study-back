@@ -65,15 +65,21 @@ export class UserService {
     return updatedUser;
   }
 
-  async login(login: LoggedUserDto): Promise<LoggedUserResponse> {
+  async login(
+    login: LoggedUserDto,
+    from?: string,
+  ): Promise<LoggedUserResponse> {
     const { email, password } = login;
     const user = await this.userModel.findOne({ email });
+
+    if (from === 'admin' && !user.isAdmin)
+      throw new Error('User is not an admin.');
 
     if (!user || !bcrypt.compareSync(password, user.password)) {
       throw new Error('Email or password invalid.');
     }
 
-    const payload = { user: { id: user.id } };
+    const payload = { user: { id: user.id, isAdmin: user.isAdmin } };
     const token = this.jwtService.sign(payload);
 
     return {
@@ -86,6 +92,14 @@ export class UserService {
     email?: string;
   }): Promise<User> {
     return this.userModel.findOne(params);
+  }
+
+  async findAll(): Promise<User[]> {
+    return this.userModel.find();
+  }
+
+  async countUsers(): Promise<number> {
+    return this.userModel.countDocuments();
   }
 
   async findByIds(ids: Types.ObjectId[]): Promise<User[]> {

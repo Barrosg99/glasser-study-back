@@ -7,6 +7,7 @@ import {
   ResolveField,
   Parent,
   ResolveReference,
+  Int,
 } from '@nestjs/graphql';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
@@ -96,6 +97,39 @@ export class ChatResolver {
   ) {
     if (!userId) throw new Error('You must be logged to execute this action.');
     return this.chatService.exitChat(id, userId);
+  }
+
+  // only for admin
+  @Query((returns) => [Chat])
+  adminGetChats(
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+  ) {
+    if (!isAdmin) throw new Error('You must be admin to execute this action.');
+
+    return this.chatService.findAll();
+  }
+
+  @Query((returns) => Int)
+  adminCountChats(
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You must be admin to execute this action.');
+
+    return this.chatService.countChats();
+  }
+
+  @Query((returns) => Chat)
+  adminGetChat(
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+    @Args('id', { type: () => String }) id: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You must be admin to execute this action.');
+    return this.chatService.findOne(id);
   }
 
   @ResolveReference()

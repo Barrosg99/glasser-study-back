@@ -7,6 +7,7 @@ import {
   Context,
   Parent,
   ResolveField,
+  Int,
 } from '@nestjs/graphql';
 import { PostService } from './post.service';
 import { Post, User } from './models/post.model';
@@ -76,5 +77,40 @@ export class PostResolver {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
     return this.postService.remove(id, userId);
+  }
+
+  // only admin
+  @Query(() => [Post])
+  adminGetPosts(
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You do not have permission to execute this action.');
+
+    return this.postService.findAll({});
+  }
+
+  @Query(() => Int)
+  adminCountPosts(
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You do not have permission to execute this action.');
+
+    return this.postService.countPosts();
+  }
+
+  @Query(() => Post)
+  adminGetPost(
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+    @Args('id', { type: () => ID }) id: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You do not have permission to execute this action.');
+
+    return this.postService.findOne(id);
   }
 }

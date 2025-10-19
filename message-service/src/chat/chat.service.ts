@@ -7,7 +7,10 @@ import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class ChatService {
-  constructor(@InjectModel(Chat.name) private chatModel: Model<Chat>, private readonly amqpConnection: AmqpConnection) {}
+  constructor(
+    @InjectModel(Chat.name) private chatModel: Model<Chat>,
+    private readonly amqpConnection: AmqpConnection,
+  ) {}
 
   async save(
     chat: CreateChatDto,
@@ -35,7 +38,10 @@ export class ChatService {
 
       const { members, invitedMembers } = updateChat;
 
-      const allMembers = [...members.map((member) => member.user), ...invitedMembers];
+      const allMembers = [
+        ...members.map((member) => member.user),
+        ...invitedMembers,
+      ];
       const newMembers = membersIds.filter(
         (id) => !allMembers.find((member) => member.equals(id)),
       );
@@ -92,10 +98,7 @@ export class ChatService {
   async findAll(userId?: Types.ObjectId, search?: string): Promise<Chat[]> {
     const query: FilterQuery<Chat> = {};
     if (userId) {
-      query.$or = [
-        { 'members.user': userId },
-        { invitedMembers: userId },
-      ];
+      query.$or = [{ 'members.user': userId }, { invitedMembers: userId }];
     }
 
     if (search) {
@@ -103,6 +106,10 @@ export class ChatService {
     }
 
     return this.chatModel.find(query);
+  }
+
+  async countChats(): Promise<number> {
+    return this.chatModel.countDocuments();
   }
 
   async findOne(id: string): Promise<Chat> {
@@ -140,10 +147,15 @@ export class ChatService {
   }
 
   async exitChat(id: string, userId: Types.ObjectId) {
-    const chat = await this.chatModel.findOne({ _id: id, members: { user: userId } });
+    const chat = await this.chatModel.findOne({
+      _id: id,
+      members: { user: userId },
+    });
     if (!chat) throw new Error('Chat not found');
 
-    chat.members = chat.members.filter((id) => id.toString() !== userId.toString());
+    chat.members = chat.members.filter(
+      (id) => id.toString() !== userId.toString(),
+    );
     await chat.save();
     return true;
   }

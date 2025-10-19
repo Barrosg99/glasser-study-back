@@ -1,6 +1,8 @@
 import {
   Args,
   Context,
+  ID,
+  Int,
   Mutation,
   Query,
   Resolver,
@@ -59,8 +61,11 @@ export class UserResolver {
   }
 
   @Mutation((returns) => LoggedUserResponse)
-  async login(@Args('userLoginData') userLoginData: LoggedUserDto) {
-    const loginData = await this.usersService.login(userLoginData);
+  async login(
+    @Args('userLoginData') userLoginData: LoggedUserDto,
+    @Context('from') from: string,
+  ) {
+    const loginData = await this.usersService.login(userLoginData, from);
 
     return loginData;
   }
@@ -68,6 +73,41 @@ export class UserResolver {
   @Mutation((returns) => Boolean)
   async resetPassword(@Args('email') email: string) {
     return this.usersService.resetPassword(email);
+  }
+
+  // only for admin
+  @Query((returns) => [User])
+  async adminGetUsers(
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You do not have permission to execute this action.');
+
+    return this.usersService.findAll();
+  }
+
+  @Query((returns) => Int)
+  async adminCountUsers(
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You do not have permission to execute this action.');
+
+    return this.usersService.countUsers();
+  }
+
+  @Query((returns) => User)
+  async adminGetUser(
+    @Args('id', { type: () => ID }) id: string,
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You do not have permission to execute this action.');
+
+    return this.usersService.findOne({ _id: new Types.ObjectId(id) });
   }
 
   @ResolveReference()
