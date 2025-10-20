@@ -1,8 +1,9 @@
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { Report } from './models/report.model';
 import { SaveReportDto } from './dto/save-report.dto';
 import { Injectable } from '@nestjs/common';
+import { QueryReportsDto } from './dto/query-reports.dto';
 
 @Injectable()
 export class ReportService {
@@ -23,12 +24,32 @@ export class ReportService {
     return this.reportModel.findById(id);
   }
 
-  findAll(): Promise<Report[]> {
-    return this.reportModel.find();
+  findAll(queryReportsDto: QueryReportsDto): Promise<Report[]> {
+    const query: FilterQuery<Report> = {};
+
+    if (queryReportsDto?.status) query.status = queryReportsDto.status;
+
+    if (queryReportsDto?.entity) query.entity = queryReportsDto.entity;
+
+    if (queryReportsDto?.reason) {
+      query.reason = { $regex: queryReportsDto.reason, $options: 'i' };
+    }
+
+    return this.reportModel.find(query);
   }
 
-  count(): Promise<number> {
-    return this.reportModel.countDocuments();
+  count(queryReportsDto: QueryReportsDto): Promise<number> {
+    const query: FilterQuery<Report> = {};
+
+    if (queryReportsDto?.status) query.status = queryReportsDto.status;
+
+    if (queryReportsDto?.entity) query.entity = queryReportsDto.entity;
+
+    if (queryReportsDto?.reason) {
+      query.reason = { $regex: queryReportsDto.reason, $options: 'i' };
+    }
+
+    return this.reportModel.countDocuments(query);
   }
 
   async delete(id: Types.ObjectId, userId: Types.ObjectId): Promise<boolean> {
@@ -39,5 +60,23 @@ export class ReportService {
     await report.deleteOne();
 
     return true;
+  }
+
+  async resolve({
+    id,
+    userId,
+    resolvedReason,
+    status,
+  }: {
+    id: Types.ObjectId;
+    userId: Types.ObjectId;
+    resolvedReason: string;
+    status: string;
+  }): Promise<Report> {
+    return this.reportModel.findByIdAndUpdate(
+      id,
+      { resolvedReason, status, resolvedBy: userId },
+      { returnDocument: 'after' },
+    );
   }
 }

@@ -21,8 +21,14 @@ export enum Entity {
   POST = 'post',
   MESSAGE = 'message',
 }
+export enum ReportStatus {
+  PENDING = 'pending',
+  RESOLVED = 'resolved',
+  REJECTED = 'rejected',
+}
 
 registerEnumType(Entity, { name: 'Entity' });
+registerEnumType(ReportStatus, { name: 'ReportStatus' });
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -49,8 +55,16 @@ export class Report extends Document {
   @Prop({ required: false })
   description?: string;
 
-  @Prop({ required: false, type: [Types.ObjectId] })
-  resolvedBy?: Types.ObjectId[];
+  @Prop({ required: false, type: Types.ObjectId })
+  resolvedBy?: Types.ObjectId;
+
+  @Field(() => ReportStatus)
+  @Prop({ required: true, enum: ReportStatus })
+  status: ReportStatus;
+
+  @Field(() => String, { nullable: true })
+  @Prop({ required: false })
+  resolvedReason?: string;
 
   @Field(() => Date)
   createdAt: Date;

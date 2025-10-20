@@ -38,7 +38,12 @@ import { Types } from 'mongoose';
       driver: ApolloFederationDriver,
       context: ({ req }) => {
         const userId = req.headers['user-id'] as string;
-        if (userId) return { userId: new Types.ObjectId(userId) };
+        const from = req.headers['from'] as string;
+        const isAdmin = req.headers['is-admin'] as string;
+        const context: any = { from };
+        if (userId) context.userId = new Types.ObjectId(userId);
+        if (isAdmin) context.isAdmin = Boolean(isAdmin);
+        return context;
       },
       autoSchemaFile: true,
       playground: false,
