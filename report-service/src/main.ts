@@ -5,13 +5,6 @@ import { Logger } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'from'],
-    credentials: true,
-  });
-
   const port = process.env.PORT || 3000;
 
   await app.listen(port);
@@ -20,6 +13,6 @@ async function bootstrap() {
 
   const url = serverUrl.replace('[::1]', 'localhost');
 
-  Logger.log(`🚀 Gateway is running on: ${url}`, 'API');
+  Logger.log(`🚀 Reports SubgrapqhQL is running on: ${url}`, 'API');
 }
 bootstrap();

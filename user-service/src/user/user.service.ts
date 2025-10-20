@@ -7,6 +7,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoggedUserDto, LoggedUserResponse } from './dto/logged-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
+import { AdminEditUserDto } from './dto/admin-edit-user.dto';
 
 const saltOrRounds = 10;
 
@@ -65,15 +66,33 @@ export class UserService {
     return updatedUser;
   }
 
-  async login(login: LoggedUserDto): Promise<LoggedUserResponse> {
+  async adminEdit(userData: AdminEditUserDto, userId: string): Promise<User> {
+    const updatedUser = await this.userModel.findOneAndUpdate(
+      { _id: userId },
+      { $set: userData },
+      { new: true },
+    );
+
+    return updatedUser;
+  }
+
+  async login(
+    login: LoggedUserDto,
+    from?: string,
+  ): Promise<LoggedUserResponse> {
     const { email, password } = login;
     const user = await this.userModel.findOne({ email });
+
+    if (user.blocked) throw new Error('User is blocked.');
+
+    if (from === 'admin' && !user.isAdmin)
+      throw new Error('User is not an admin.');
 
     if (!user || !bcrypt.compareSync(password, user.password)) {
       throw new Error('Email or password invalid.');
     }
 
-    const payload = { user: { id: user.id } };
+    const payload = { user: { id: user.id, isAdmin: user.isAdmin } };
     const token = this.jwtService.sign(payload);
 
     return {
@@ -86,6 +105,14 @@ export class UserService {
     email?: string;
   }): Promise<User> {
     return this.userModel.findOne(params);
+  }
+
+  async findAll(): Promise<User[]> {
+    return this.userModel.find();
+  }
+
+  async countUsers(): Promise<number> {
+    return this.userModel.countDocuments();
   }
 
   async findByIds(ids: Types.ObjectId[]): Promise<User[]> {

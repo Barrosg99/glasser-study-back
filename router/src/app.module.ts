@@ -23,17 +23,22 @@ import { ConfigModule } from '@nestjs/config';
             secret: process.env.JWT_SECRET,
           });
 
+          const context: any = { from: req.headers['from'] as string };
+
           const authHeader = req.headers.authorization;
 
           if (authHeader) {
             const token = authHeader;
             try {
               const decoded = jwtService.verify(token);
-              return { userId: decoded.user.id };
+              context.userId = decoded.user.id;
+              context.isAdmin = decoded.user.isAdmin;
             } catch (err) {
               throw new Error('Token Inválido');
             }
           }
+
+          return context;
         },
       },
       gateway: {
@@ -47,6 +52,7 @@ import { ConfigModule } from '@nestjs/config';
                 { name: 'users', url: 'http://localhost:4001' },
                 { name: 'posts', url: 'http://localhost:4002' },
                 { name: 'messages', url: 'http://localhost:4003' },
+                { name: 'reports', url: 'http://localhost:4005' },
               ],
         }),
         buildService: ({ url }) => {
@@ -55,6 +61,10 @@ import { ConfigModule } from '@nestjs/config';
             willSendRequest({ request, context }: any) {
               if (context?.userId)
                 request.http.headers.set('user-id', context.userId);
+              if (context?.isAdmin)
+                request.http.headers.set('is-admin', context.isAdmin);
+              if (context?.from)
+                request.http.headers.set('from', context.from);
             },
           });
         },

@@ -1,37 +1,21 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import {
   ApolloFederationDriver,
   ApolloFederationDriverConfig,
 } from '@nestjs/apollo';
-import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
-import { Types } from 'mongoose';
+import { MongooseModule } from '@nestjs/mongoose';
 
-import { MessageModule } from './message/message.module';
-import { ChatModule } from './chat/chat.module';
-
+import { ReportModule } from './report/report.module';
 import { HealthController } from './app.controller';
+import { Types } from 'mongoose';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    GraphQLModule.forRoot<ApolloFederationDriverConfig>({
-      driver: ApolloFederationDriver,
-      context: ({ req }) => {
-        const userId = req.headers['user-id'] as string;
-        const from = req.headers['from'] as string;
-        const isAdmin = req.headers['is-admin'] as string;
-        const context: any = { from };
-        if (userId) context.userId = new Types.ObjectId(userId);
-        if (isAdmin) context.isAdmin = Boolean(isAdmin);
-        return context;
-      },
-      autoSchemaFile: true,
-      playground: false,
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
-      path: '/',
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -50,8 +34,23 @@ import { HealthController } from './app.controller';
       },
       inject: [ConfigService],
     }),
-    MessageModule,
-    ChatModule,
+    GraphQLModule.forRoot<ApolloFederationDriverConfig>({
+      driver: ApolloFederationDriver,
+      context: ({ req }) => {
+        const userId = req.headers['user-id'] as string;
+        const from = req.headers['from'] as string;
+        const isAdmin = req.headers['is-admin'] as string;
+        const context: any = { from };
+        if (userId) context.userId = new Types.ObjectId(userId);
+        if (isAdmin) context.isAdmin = Boolean(isAdmin);
+        return context;
+      },
+      autoSchemaFile: true,
+      playground: false,
+      plugins: [ApolloServerPluginLandingPageLocalDefault()],
+      path: '/',
+    }),
+    ReportModule,
   ],
   controllers: [HealthController],
 })

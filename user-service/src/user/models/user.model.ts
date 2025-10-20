@@ -43,6 +43,14 @@ export class User {
   })
   goal: UserGoal;
 
+  @Field(() => Boolean, { nullable: false })
+  @Prop({ required: true, default: false })
+  isAdmin: boolean;
+
+  @Field(() => Boolean, { nullable: false })
+  @Prop({ required: true, default: false })
+  blocked: boolean;
+
   @Field(() => Date, { nullable: true })
   createdAt: Date;
 

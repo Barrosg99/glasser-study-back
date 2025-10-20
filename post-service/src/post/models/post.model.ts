@@ -87,6 +87,10 @@ export class Post extends Document {
   @Field()
   isAuthor: boolean;
 
+  @Prop({ required: true, default: false })
+  @Field(() => Boolean)
+  isDeleted: boolean;
+
   @Field()
   @Prop({ default: Date.now })
   createdAt: Date;

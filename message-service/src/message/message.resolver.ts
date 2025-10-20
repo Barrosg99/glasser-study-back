@@ -7,6 +7,7 @@ import {
   Context,
   Parent,
   ResolveField,
+  Int,
 } from '@nestjs/graphql';
 import { MessageService } from './message.service';
 import { Message, User } from './models/message.model';
@@ -14,6 +15,7 @@ import { SaveMessageDto } from './dto/save-message.dto';
 import { Types } from 'mongoose';
 import { Chat } from '../chat/models/chat.model';
 import { ChatService } from '../chat/chat.service';
+import { QueryMessagesInput } from './dto/query-messages.dto';
 
 @Resolver(() => Message)
 export class MessageResolver {
@@ -29,7 +31,7 @@ export class MessageResolver {
 
   @ResolveField(() => Chat)
   chat(@Parent() message: Message) {
-    return this.chatService.findOne(message.chatId.toString());
+    return this.chatService.findOne({ _id: message.chatId.toString() });
   }
 
   @ResolveField(() => Boolean)
@@ -116,5 +118,53 @@ export class MessageResolver {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
     return this.messageService.remove(id, userId);
+  }
+
+  // only for admin
+  @Query(() => [Message])
+  adminGetMessages(
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+    @Args('queryMessagesInput', { type: () => QueryMessagesInput })
+    queryMessagesInput: QueryMessagesInput,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You must be admin to execute this action.');
+
+    return this.messageService.findAll({
+      chatId: queryMessagesInput.chatId,
+      limit: queryMessagesInput.limit,
+      skip: queryMessagesInput.skip,
+      messageId: queryMessagesInput.messageId,
+      isAdmin,
+    });
+  }
+
+  @Query(() => Int)
+  adminCountMessages(
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+    @Args('queryMessagesInput', { type: () => QueryMessagesInput })
+    queryMessagesInput: Omit<QueryMessagesInput, 'limit' | 'skip'>,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You must be admin to execute this action.');
+
+    return this.messageService.count({
+      chatId: queryMessagesInput.chatId,
+      messageId: queryMessagesInput.messageId,
+      isAdmin,
+    });
+  }
+
+  @Query(() => Message)
+  adminGetMessage(
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+    @Args('id', { type: () => ID }) id: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You must be admin to execute this action.');
+    return this.messageService.findOne(id);
   }
 }
