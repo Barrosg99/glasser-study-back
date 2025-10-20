@@ -28,6 +28,21 @@ export class ReportResolver {
     return report.resolvedBy.map((id) => ({ _typename: 'User', id }));
   }
 
+  @Query(() => [Report])
+  async reports() {
+    return this.reportService.findAll();
+  }
+
+  @Query(() => Int)
+  async countReports() {
+    return this.reportService.count();
+  }
+
+  @Query(() => Report)
+  async report(@Args('id', { type: () => ID }) id: Types.ObjectId) {
+    return this.reportService.findOne(id);
+  }
+
   @Mutation(() => Report)
   async createReport(
     @Context('userId') userId: Types.ObjectId,

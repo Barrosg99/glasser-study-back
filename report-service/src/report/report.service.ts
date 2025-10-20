@@ -6,9 +6,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ReportService {
-  constructor(
-    @InjectModel(Report.name) private reportModel: Model<Report>,
-  ) {}
+  constructor(@InjectModel(Report.name) private reportModel: Model<Report>) {}
 
   async create(params: {
     saveReportDto: SaveReportDto;
@@ -25,8 +23,12 @@ export class ReportService {
     return this.reportModel.findById(id);
   }
 
-  find(params: { userId: Types.ObjectId }): Promise<Report[]> {
-    return this.reportModel.find({ userId: params.userId });
+  findAll(): Promise<Report[]> {
+    return this.reportModel.find();
+  }
+
+  count(): Promise<number> {
+    return this.reportModel.countDocuments();
   }
 
   async delete(id: Types.ObjectId, userId: Types.ObjectId): Promise<boolean> {

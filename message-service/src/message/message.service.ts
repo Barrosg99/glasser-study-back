@@ -63,12 +63,19 @@ export class MessageService {
   async findAll(params?: {
     userId?: Types.ObjectId;
     chatId?: Types.ObjectId;
+    limit?: number;
+    skip?: number;
+    messageId?: Types.ObjectId;
+    isAdmin?: boolean;
   }): Promise<Message[]> {
-    const { userId, chatId } = params;
+    const { userId, chatId, messageId, limit, skip, isAdmin } = params;
 
     const query: FilterQuery<Message> = {};
-    // verificar se o userId é um membro do chat
-    if (chatId) {
+
+    if (isAdmin) {
+      if (chatId) query.chatId = chatId;
+      if (messageId) query._id = messageId;
+    } else if (chatId) {
       const chat = await this.chatModel.findById(chatId);
       const isMember = chat.members.find((member) =>
         member.user.equals(userId),
@@ -85,7 +92,24 @@ export class MessageService {
       }
     }
 
-    return this.messageModel.find(query).sort({ createdAt: 1 });
+    return this.messageModel.find(query, null, {
+      limit,
+      skip,
+      sort: { createdAt: 1 },
+    });
+  }
+
+  async count(params?: {
+    chatId?: Types.ObjectId;
+    messageId?: Types.ObjectId;
+    isAdmin?: boolean;
+  }): Promise<number> {
+    const { chatId, isAdmin } = params;
+    const query: FilterQuery<Message> = {};
+    if (chatId && isAdmin) {
+      query.chatId = chatId;
+    }
+    return this.messageModel.countDocuments(query);
   }
 
   findOne(id: string): Promise<Message> {

@@ -112,8 +112,8 @@ export class ChatService {
     return this.chatModel.countDocuments();
   }
 
-  async findOne(id: string): Promise<Chat> {
-    return this.chatModel.findById(id);
+  async findOne(params: { _id: string }): Promise<Chat> {
+    return this.chatModel.findOne(params);
   }
 
   async remove(id: string, userId: Types.ObjectId) {

@@ -129,7 +129,7 @@ export class ChatResolver {
   ) {
     if (from !== 'admin' || !isAdmin)
       throw new Error('You must be admin to execute this action.');
-    return this.chatService.findOne(id);
+    return this.chatService.findOne({ _id: id });
   }
 
   @ResolveReference()
@@ -137,6 +137,6 @@ export class ChatResolver {
     __typename: string;
     id: string;
   }): Promise<Chat> {
-    return this.chatService.findOne(reference.id);
+    return this.chatService.findOne({ _id: reference.id });
   }
 }

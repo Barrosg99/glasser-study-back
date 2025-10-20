@@ -1,4 +1,10 @@
-import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
+import {
+  Directive,
+  Field,
+  ID,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
@@ -11,15 +17,22 @@ export class User {
   id: Types.ObjectId;
 }
 
+export enum Entity {
+  POST = 'post',
+  MESSAGE = 'message',
+}
+
+registerEnumType(Entity, { name: 'Entity' });
+
 @Schema({ timestamps: true })
 @ObjectType()
 export class Report extends Document {
   @Field(() => ID, { name: 'id' })
   _id: Types.ObjectId;
 
-  @Field(() => String)
-  @Prop({ required: true })
-  entity: string;
+  @Field(() => Entity)
+  @Prop({ required: true, enum: Entity })
+  entity: Entity;
 
   @Field(() => String)
   @Prop({ required: true })
