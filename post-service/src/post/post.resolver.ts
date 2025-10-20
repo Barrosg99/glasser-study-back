@@ -76,7 +76,7 @@ export class PostResolver {
   ) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
-    return this.postService.remove(id, userId);
+    return this.postService.remove({ id, userId });
   }
 
   // only admin
@@ -88,7 +88,7 @@ export class PostResolver {
     if (from !== 'admin' || !isAdmin)
       throw new Error('You do not have permission to execute this action.');
 
-    return this.postService.findAll({});
+    return this.postService.findAll({ isAdmin });
   }
 
   @Query(() => Int)
@@ -112,5 +112,17 @@ export class PostResolver {
       throw new Error('You do not have permission to execute this action.');
 
     return this.postService.findOne(id);
+  }
+
+  @Mutation(() => Post)
+  adminDeletePost(
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+    @Args('id', { type: () => ID }) id: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You do not have permission to execute this action.');
+
+    return this.postService.remove({ id, isAdmin });
   }
 }

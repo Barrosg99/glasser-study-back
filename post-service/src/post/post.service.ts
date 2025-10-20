@@ -37,14 +37,21 @@ export class PostService {
     searchFilter,
     subject,
     materialType,
+    isAdmin,
   }: {
     userId?: Types.ObjectId;
     searchTerm?: string;
     searchFilter?: string;
     subject?: string;
     materialType?: string;
+    isAdmin?: boolean;
   }): Promise<Post[]> {
     const query: FilterQuery<Post> = {};
+
+    if (!isAdmin) {
+      query.isDeleted = false;
+    }
+
     if (userId) {
       query.author = userId;
     }
@@ -80,12 +87,22 @@ export class PostService {
     return this.postModel.findById(id);
   }
 
-  async remove(id: string, userId: Types.ObjectId): Promise<Post> {
-    const post = await this.postModel.findOne({ _id: id, author: userId });
+  async remove(params: {
+    id: string;
+    isAdmin?: boolean;
+    userId?: Types.ObjectId;
+  }): Promise<Post> {
+    const { id, isAdmin, userId } = params;
+    const query: FilterQuery<Post> = { _id: id };
+    if (!isAdmin) {
+      query.author = userId;
+    }
+    const post = await this.postModel.findOne(query);
 
     if (!post) throw new Error('Post not found.');
 
-    await post.deleteOne();
+    post.isDeleted = true;
+    await post.save();
 
     return post;
   }
