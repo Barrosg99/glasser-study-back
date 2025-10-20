@@ -13,6 +13,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoggedUserDto, LoggedUserResponse } from './dto/logged-user.dto';
 import { Types } from 'mongoose';
+import { AdminEditUserDto } from './dto/admin-edit-user.dto';
 
 @Resolver((of) => User)
 export class UserResolver {
@@ -22,7 +23,11 @@ export class UserResolver {
   async me(@Context('userId') userId: Types.ObjectId) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
-    return this.usersService.findOne({ _id: userId });
+    const user = await this.usersService.findOne({ _id: userId });
+
+    if (user.blocked) throw new Error('User is blocked.');
+
+    return user;
   }
 
   @Query((returns) => User)
@@ -108,6 +113,19 @@ export class UserResolver {
       throw new Error('You do not have permission to execute this action.');
 
     return this.usersService.findOne({ _id: new Types.ObjectId(id) });
+  }
+
+  @Mutation((returns) => User)
+  async adminEditUser(
+    @Args('userData') userData: AdminEditUserDto,
+    @Args('userId', { type: () => ID }) userId: string,
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You do not have permission to execute this action.');
+
+    return this.usersService.adminEdit(userData, userId);
   }
 
   @ResolveReference()

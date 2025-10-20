@@ -7,6 +7,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoggedUserDto, LoggedUserResponse } from './dto/logged-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
+import { AdminEditUserDto } from './dto/admin-edit-user.dto';
 
 const saltOrRounds = 10;
 
@@ -65,12 +66,24 @@ export class UserService {
     return updatedUser;
   }
 
+  async adminEdit(userData: AdminEditUserDto, userId: string): Promise<User> {
+    const updatedUser = await this.userModel.findOneAndUpdate(
+      { _id: userId },
+      { $set: userData },
+      { new: true },
+    );
+
+    return updatedUser;
+  }
+
   async login(
     login: LoggedUserDto,
     from?: string,
   ): Promise<LoggedUserResponse> {
     const { email, password } = login;
     const user = await this.userModel.findOne({ email });
+
+    if (user.blocked) throw new Error('User is blocked.');
 
     if (from === 'admin' && !user.isAdmin)
       throw new Error('User is not an admin.');
