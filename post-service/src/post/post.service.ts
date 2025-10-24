@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { FilterQuery, Model, PipelineStage, Types } from 'mongoose';
 import { Post } from './models/post.model';
 import { SavePostDto } from './dto/save-post.dto';
+import { PostSummaryResponse } from './dto/post-summary.dto';
+import { Period } from './dto/post-summary.dto';
 
 @Injectable()
 export class PostService {
@@ -105,5 +107,65 @@ export class PostService {
     await post.save();
 
     return post;
+  }
+
+  async summary(period: Period): Promise<PostSummaryResponse> {
+    const days = {
+      [Period.WEEK]: 7,
+      [Period.MONTH]: 30,
+      [Period.THREE_MONTHS]: 90,
+    };
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days[period]);
+    startDate.setHours(0, 0, 0, 0);
+
+    const pipeline: PipelineStage[] = [
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: '$createdAt',
+              timezone: 'America/Sao_Paulo',
+            },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          day: '$_id',
+          count: '$count',
+        },
+      },
+      {
+        $sort: {
+          day: 1,
+        },
+      },
+    ];
+
+    const results = await this.postModel.aggregate(pipeline);
+
+    const labels = [];
+    const data = [];
+
+    for (const result of results) {
+      const [, month, day] = result.day.split('-');
+      labels.push(`${day}/${month}`);
+      data.push(result.count);
+    }
+
+    return {
+      labels,
+      data,
+    };
   }
 }

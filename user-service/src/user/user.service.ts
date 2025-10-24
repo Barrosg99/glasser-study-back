@@ -1,4 +1,4 @@
-import { Model, Types } from 'mongoose';
+import { Model, PipelineStage, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -8,6 +8,11 @@ import { LoggedUserDto, LoggedUserResponse } from './dto/logged-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { AdminEditUserDto } from './dto/admin-edit-user.dto';
+import {
+  Period,
+  UserSummaryResponse,
+  UserSummaryInput,
+} from './dto/user-summary.dto';
 
 const saltOrRounds = 10;
 
@@ -146,5 +151,65 @@ export class UserService {
     });
 
     return true;
+  }
+
+  async summary(period: Period): Promise<UserSummaryResponse> {
+    const days = {
+      [Period.WEEK]: 7,
+      [Period.MONTH]: 30,
+      [Period.THREE_MONTHS]: 90,
+    };
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days[period]);
+    startDate.setHours(0, 0, 0, 0);
+
+    const pipeline: PipelineStage[] = [
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: '$createdAt',
+              timezone: 'America/Sao_Paulo',
+            },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          day: '$_id',
+          count: '$count',
+        },
+      },
+      {
+        $sort: {
+          day: 1,
+        },
+      },
+    ];
+
+    const results = await this.userModel.aggregate(pipeline);
+
+    const labels = [];
+    const data = [];
+
+    for (const result of results) {
+      const [, month, day] = result.day.split('-');
+      labels.push(`${day}/${month}`);
+      data.push(result.count);
+    }
+
+    return {
+      labels,
+      data,
+    };
   }
 }
