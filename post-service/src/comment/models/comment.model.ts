@@ -3,7 +3,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Document, Types } from 'mongoose';
 import { User } from '../../post/models/post.model';
 
-@ObjectType()
+@ObjectType({ description: 'Represents a comment in the system' })
 @Schema({ timestamps: true })
 export class Comment extends Document {
   @Field(() => ID)

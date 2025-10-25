@@ -21,9 +21,9 @@ export enum Period {
   THREE_MONTHS = 'three_months',
 }
 
-registerEnumType(Period, { name: 'Period' });
+registerEnumType(Period, { name: 'Period', description: 'Represents a period for summary input' });
 
-@InputType()
+@InputType({ description: 'Input data for getting a post summary' })
 export class PostSummaryInput {
   @Field(() => Period)
   period: Period;

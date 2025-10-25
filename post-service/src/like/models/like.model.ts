@@ -3,7 +3,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Document, Types } from 'mongoose';
 import { Post, User } from 'src/post/models/post.model';
 
-@ObjectType()
+@ObjectType({ description: 'Represents a like in the system' })
 @Schema({ timestamps: true })
 export class Like extends Document {
   @Field(() => ID)

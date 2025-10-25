@@ -17,17 +17,19 @@ import { User, Post } from '../post/models/post.model';
 export class CommentResolver {
   constructor(private commentService: CommentService) {}
 
-  @ResolveField(() => Post)
+  @ResolveField(() => Post, { description: 'Get the post for a comment' })
   async post(@Parent() comment: Comment) {
     return this.commentService.getPost(comment.post);
   }
 
-  @ResolveField(() => User)
+  @ResolveField(() => User, { description: 'Get the author for a comment' })
   author(@Parent() comment: Comment) {
     return { _typename: 'User', id: comment.author };
   }
 
-  @ResolveField(() => Boolean)
+  @ResolveField(() => Boolean, {
+    description: 'Check if the current user is the author of the comment',
+  })
   isAuthor(
     @Parent() comment: Comment,
     @Context('userId') userId: Types.ObjectId,
@@ -35,7 +37,10 @@ export class CommentResolver {
     return comment.author.equals(userId);
   }
 
-  @Mutation(() => Comment)
+  @Mutation(() => Comment, {
+    description:
+      'Create a comment, Ex: createComment(input: { postId: "1234567890", content: "Comment content" })',
+  })
   async createComment(
     @Context('userId') userId: Types.ObjectId,
     @Args('input') input: CreateCommentDto,
@@ -49,12 +54,17 @@ export class CommentResolver {
     );
   }
 
-  @Query(() => [Comment])
+  @Query(() => [Comment], {
+    description:
+      'Get all comments for a post, Ex: getComments(postId: "1234567890")',
+  })
   async getComments(@Args('postId', { type: () => String }) postId: string) {
     return this.commentService.getComments(new Types.ObjectId(postId));
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Boolean, {
+    description: 'Delete a comment, Ex: deleteComment(commentId: "1234567890")',
+  })
   async deleteComment(
     @Context('userId') userId: Types.ObjectId,
     @Args('commentId', { type: () => String }) commentId: string,

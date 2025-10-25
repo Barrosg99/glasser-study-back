@@ -14,10 +14,10 @@ export enum UserGoal {
   GROUP_STUDY = 'groupStudy',
 }
 
-registerEnumType(UserGoal, { name: 'UserGoal' });
+registerEnumType(UserGoal, { name: 'UserGoal', description: 'Represents a user goal' });
 
 @Schema({ timestamps: true })
-@ObjectType()
+@ObjectType({ description: 'Represents a user in the system' })
 @Directive('@key(fields: "id")')
 export class User {
   @Field(() => ID)

@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 
-@InputType()
+@InputType({ description: 'Input data for saving a report' })
 export class SaveReportDto {
   @Field()
   readonly entity: string;

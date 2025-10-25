@@ -3,7 +3,7 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { User } from 'src/user/models/user.model';
 
-@ObjectType()
+@ObjectType({ description: 'Represents a task in a goal' })
 @Schema({ _id: false, versionKey: false })
 export class Task {
   @Field(() => String)
@@ -24,7 +24,7 @@ export class Task {
 }
 
 @Schema({ timestamps: true })
-@ObjectType()
+@ObjectType({ description: 'Represents a goal in the system' })
 export class Goals extends Document {
   @Field(() => ID, { name: 'id' })
   _id: Types.ObjectId;

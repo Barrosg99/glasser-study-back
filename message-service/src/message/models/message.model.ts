@@ -11,16 +11,7 @@ export class User {
   id: Types.ObjectId;
 }
 
-@ObjectType()
-@Directive('@extends')
-@Directive('@key(fields: "id")')
-export class Group {
-  @Field(() => ID)
-  @Directive('@external')
-  id: Types.ObjectId;
-}
-
-@ObjectType()
+@ObjectType({ description: 'Represents a message in the system' })
 @Schema({ timestamps: true })
 export class Message extends Document {
   @Field(() => ID)

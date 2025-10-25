@@ -24,17 +24,19 @@ export class MessageResolver {
     private readonly chatService: ChatService,
   ) {}
 
-  @ResolveField(() => User)
+  @ResolveField(() => User, { description: 'Get the sender of a message' })
   sender(@Parent() message: Message) {
     return { _typename: 'User', id: message.senderId };
   }
 
-  @ResolveField(() => Chat)
+  @ResolveField(() => Chat, { description: 'Get the chat of a message' })
   chat(@Parent() message: Message) {
     return this.chatService.findOne({ _id: message.chatId.toString() });
   }
 
-  @ResolveField(() => Boolean)
+  @ResolveField(() => Boolean, {
+    description: 'Check if the current user is the sender of the message',
+  })
   isCurrentUser(
     @Parent() message: Message,
     @Context('userId') userId: Types.ObjectId,
@@ -42,7 +44,10 @@ export class MessageResolver {
     return message.senderId.equals(userId);
   }
 
-  @Mutation(() => Message)
+  @Mutation(() => Message, {
+    description:
+      'Save a message, Ex: saveMessage(saveMessageDto: { receiverId: "1234567890", chatId: "1234567890", content: "Message content" })',
+  })
   saveMessage(
     @Context('userId') userId: Types.ObjectId,
     @Args('saveMessageInput') saveMessageInput: SaveMessageDto,
@@ -60,17 +65,24 @@ export class MessageResolver {
     return this.messageService.save(id, saveMessageInput, userId);
   }
 
-  @Query(() => [Message], { name: 'messages' })
+  @Query(() => [Message], { name: 'messages', description: 'Get all messages' })
   findAll() {
     return this.messageService.findAll();
   }
 
-  @Query(() => Message, { name: 'message' })
+  @Query(() => Message, {
+    name: 'message',
+    description: 'Get a message by ID, Ex: message(id: "1234567890")',
+  })
   findOne(@Args('id', { type: () => ID }) id: string) {
     return this.messageService.findOne(id);
   }
 
-  @Query(() => [Message], { name: 'chatMessages' })
+  @Query(() => [Message], {
+    name: 'chatMessages',
+    description:
+      'Get all messages for a chat, Ex: chatMessages(chatId: "1234567890")',
+  })
   findChatMessages(
     @Context('userId') userId: Types.ObjectId,
     @Args('chatId', { type: () => ID }) chatId: Types.ObjectId,
@@ -80,14 +92,21 @@ export class MessageResolver {
     return this.messageService.findAll({ chatId, userId });
   }
 
-  @Query(() => [Message], { name: 'myMessages' })
+  @Query(() => [Message], {
+    name: 'myMessages',
+    description: 'Get all messages for the current user, Ex: myMessages()',
+  })
   findMyMessages(@Context('userId') userId: Types.ObjectId) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
     return this.messageService.findAll({ userId });
   }
 
-  @Query(() => [Message], { name: 'conversation' })
+  @Query(() => [Message], {
+    name: 'conversation',
+    description:
+      'Get a conversation with another user, Ex: conversation(otherUserId: "1234567890")',
+  })
   findConversation(
     @Context('userId') userId: Types.ObjectId,
     @Args('otherUserId', { type: () => ID }) otherUserId: string,
@@ -100,7 +119,10 @@ export class MessageResolver {
     );
   }
 
-  @Mutation(() => Message)
+  @Mutation(() => Message, {
+    description:
+      'Mark a message as read, Ex: markMessageAsRead(id: "1234567890")',
+  })
   markMessageAsRead(
     @Context('userId') userId: Types.ObjectId,
     @Args('id', { type: () => ID }) id: string,
@@ -110,7 +132,9 @@ export class MessageResolver {
     return this.messageService.markAsRead(id, userId);
   }
 
-  @Mutation(() => Message)
+  @Mutation(() => Message, {
+    description: 'Remove a message, Ex: removeMessage(id: "1234567890")',
+  })
   removeMessage(
     @Context('userId') userId: Types.ObjectId,
     @Args('id', { type: () => ID }) id: string,
@@ -121,7 +145,7 @@ export class MessageResolver {
   }
 
   // only for admin
-  @Query(() => [Message])
+  @Query(() => [Message], { description: 'Get all messages (admin only)' })
   adminGetMessages(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,
@@ -140,7 +164,7 @@ export class MessageResolver {
     });
   }
 
-  @Query(() => Int)
+  @Query(() => Int, { description: 'Count all messages (admin only)' })
   adminCountMessages(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,
@@ -157,7 +181,10 @@ export class MessageResolver {
     });
   }
 
-  @Query(() => Message)
+  @Query(() => Message, {
+    description:
+      'Get a message by ID (admin only), Ex: adminGetMessage(id: "1234567890")',
+  })
   adminGetMessage(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,

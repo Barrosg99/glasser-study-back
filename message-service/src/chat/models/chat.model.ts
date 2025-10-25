@@ -3,7 +3,7 @@ import { Document, HydratedDocument, Types } from 'mongoose';
 import { Directive, Field, ID, ObjectType } from '@nestjs/graphql';
 import { User } from 'src/message/models/message.model';
 
-@ObjectType()
+@ObjectType({ description: 'Represents a member in a chat' })
 export class Member {
   @Field(() => User)
   user: Types.ObjectId;
@@ -22,7 +22,7 @@ export class MongoMembers {
 }
 
 @Schema({ timestamps: true })
-@ObjectType()
+@ObjectType({ description: 'Represents a chat in the system' })
 @Directive('@key(fields: "id")')
 export class Chat extends Document {
   @Field(() => ID)

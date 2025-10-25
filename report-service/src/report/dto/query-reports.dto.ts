@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { Entity, ReportStatus } from '../models/report.model';
 
-@InputType()
+@InputType({ description: 'Input data for querying reports' })
 export class QueryReportsDto {
   @Field({ nullable: true })
   readonly status?: ReportStatus;
