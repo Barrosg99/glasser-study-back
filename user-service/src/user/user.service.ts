@@ -2,11 +2,20 @@ import { Model, PipelineStage, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { ConfigService } from '@nestjs/config';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { v4 as uuidv4 } from 'uuid';
 import { User } from './models/user.model';
-import { CreateUserDto } from './dto/create-user.dto';
+import {
+  CreateUserDto,
+  GetPresignedUrlResponse,
+  UpdateUserDto,
+} from './dto/create-user.dto';
 import { LoggedUserDto, LoggedUserResponse } from './dto/logged-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
+
 import { AdminEditUserDto } from './dto/admin-edit-user.dto';
 import {
   Period,
@@ -18,11 +27,26 @@ const saltOrRounds = 10;
 
 @Injectable()
 export class UserService {
+  private readonly s3Client: S3Client;
+  private readonly bucketName: string;
+
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME');
+    this.s3Client = new S3Client({
+      region: this.configService.get<string>('AWS_REGION'),
+      credentials: {
+        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: this.configService.get<string>(
+          'AWS_SECRET_ACCESS_KEY',
+        ),
+      },
+    });
+  }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const hasEmailAlready = await this.userModel.findOne({
@@ -40,17 +64,8 @@ export class UserService {
     return createdUser;
   }
 
-  async edit(userData: CreateUserDto, userId: Types.ObjectId): Promise<User> {
-    const { email, password } = userData;
-
-    if (email) {
-      const hasEmailAlready = await this.userModel.findOne({
-        email: userData.email,
-        _id: { $ne: userId },
-      });
-
-      if (hasEmailAlready) throw new Error('Email already on use.');
-    }
+  async edit(userData: UpdateUserDto, userId: Types.ObjectId): Promise<User> {
+    const { password } = userData;
 
     if (password) {
       userData.password = await bcrypt.hash(userData.password, saltOrRounds);
@@ -69,6 +84,29 @@ export class UserService {
     );
 
     return updatedUser;
+  }
+
+  async getPresignedUrl(
+    type: string,
+    userId: Types.ObjectId,
+  ): Promise<GetPresignedUrlResponse> {
+    const key = `${userId.toString()}/avatar.${type.split('/')[1]}`;
+
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      ContentType: type,
+      ACL: 'public-read'
+    });
+
+    const uploadUrl = await getSignedUrl(this.s3Client, command, {
+      expiresIn: 300,
+    });
+
+    return {
+      uploadUrl,
+      publicUrl: `https://${this.bucketName}.s3.${this.configService.get<string>('AWS_REGION')}.amazonaws.com/${key}`,
+    };
   }
 
   async adminEdit(userData: AdminEditUserDto, userId: string): Promise<User> {
