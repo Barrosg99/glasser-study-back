@@ -20,18 +20,22 @@ import { MailerModule } from '@nestjs-modules/mailer';
     }),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (config: ConfigService) => ({
-        transport: {
-          service: 'SendGrid',
-          auth: {
-            user: 'apikey',
-            pass: config.get<string>('SENDGRID_API_KEY'),
+      useFactory: async (config: ConfigService) => {
+        return {
+          transport: {
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            auth: {
+              user: config.get<string>('EMAIL_USERNAME'),
+              pass: config.get<string>('EMAIL_PASSWORD'),
+            },
           },
-        },
-        defaults: {
-          from: '"Glasser Study" <glasser-study@hotmail.com>',
-        },
-      }),
+          defaults: {
+            from: '"No Reply - Glasser Study" <glasser-study@hotmail.com>',
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],
