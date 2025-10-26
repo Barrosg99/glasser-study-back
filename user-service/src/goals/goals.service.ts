@@ -151,4 +151,21 @@ export class GoalsService {
       data,
     };
   }
+
+  async count(): Promise<number> {
+    return this.goalsModel.countDocuments();
+  }
+
+  async getPercentageOfCompletedGoals(): Promise<string> {
+    const goals = await this.goalsModel.countDocuments();
+
+    const completedGoals = await this.goalsModel.countDocuments({
+      $and: [
+        { tasks: { $exists: true, $ne: [] } },
+        { tasks: { $not: { $elemMatch: { completed: false } } } },
+      ],
+    });
+
+    return `${((completedGoals / goals) * 100).toFixed(2)}%`;
+  }
 }
