@@ -1,98 +1,333 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Notification Service
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Serviço de notificações em tempo real para o Glasser Study Platform.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 📋 Descrição
 
-## Description
+Este serviço é responsável por gerenciar notificações do usuário na plataforma Glasser Study. Ele consome mensagens do RabbitMQ e distribui notificações em tempo real via GraphQL Subscriptions.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🚀 Tecnologias
 
-## Project setup
+- **NestJS** - Framework Node.js
+- **GraphQL** - Query language e runtime
+- **GraphQL Subscriptions** - Notificações em tempo real
+- **MongoDB** - Banco de dados NoSQL
+- **Mongoose** - ODM para MongoDB
+- **RabbitMQ** - Sistema de mensageria
+- **JWT** - Autenticação
 
-```bash
-$ npm install
+## 📦 Estrutura do Projeto
+
+```
+notification-service/
+├── src/
+│   ├── app.module.ts              # Módulo principal da aplicação
+│   ├── app.controller.ts          # Controller de health check
+│   ├── main.ts                    # Arquivo de entrada da aplicação
+│   └── notification/              # Módulo de notificações
+│       ├── models/
+│       │   └── notification.model.ts  # Modelo de dados
+│       ├── notification.service.ts     # Lógica de negócio
+│       ├── notification.resolver.ts    # Resolvers GraphQL
+│       ├── notification.module.ts
+│       └── pub-sub.provider.ts         # Provider de PubSub
+├── package.json
+└── README.md
 ```
 
-## Compile and run the project
+## 🛠️ Instalação
+
+### Pré-requisitos
+
+- Node.js (v18 ou superior)
+- MongoDB
+- RabbitMQ
+- Docker (opcional)
+
+### Configuração
+
+1. Clone o repositório
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cd notification-service
 ```
 
-## Run tests
+2. Instale as dependências
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
 ```
 
-## Deployment
+3. Configure as variáveis de ambiente (crie um arquivo `.env`):
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+```env
+PORT=4000
+MONGO_URI=mongodb://localhost:27017/notification_db
+MONGO_USERNAME=admin
+MONGO_PASSWORD=admin
+MONGO_HOST=localhost
+MONGO_PORT=27017
+MONGO_DB=notification_db
+JWT_SECRET=your-secret-key
+RABBITMQ_URI=amqp://guest:guest@localhost:5672
+```
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 🚀 Executando o Serviço
+
+### Desenvolvimento
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+O serviço estará disponível em `http://localhost:4000`
 
-## Resources
+### Produção
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+npm run build
+npm run start:prod
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## 📡 GraphQL API
 
-## Support
+### Endpoint
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+O serviço expõe uma API GraphQL em:
 
-## Stay in touch
+- **URL**: `http://localhost:4000/`
+- **Health Check**: `http://localhost:4000/health`
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Schema
 
-## License
+#### Notification Schema
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+**Campos:**
+
+- `id: ID` - Identificador único
+- `userId: ID` - ID do usuário
+- `message: Message` - Tipo de mensagem (NEW_MESSAGE, NEW_CHAT, NEW_COMMENT, NEW_LIKE)
+- `type: Type` - Tipo de notificação (info, warning, error, success)
+- `read: Boolean` - Se foi lida
+- `createdAt: Date` - Data de criação
+- `updatedAt: Date` - Data de atualização
+
+**Enums:**
+
+- `Type`: INFO, WARNING, ERROR, SUCCESS
+- `Message`: NEW_MESSAGE, NEW_CHAT, NEW_COMMENT, NEW_LIKE
+
+## 📝 Queries, Mutations e Subscriptions
+
+### Subscriptions
+
+```graphql
+# Receber notificações em tempo real
+subscription NewNotification {
+  newNotification {
+    id
+    userId
+    message
+    type
+    read
+    createdAt
+  }
+}
+```
+
+### Queries
+
+```graphql
+# Obter notificações do usuário
+query MyNotifications($limit: Int) {
+  myNotifications(limit: $limit) {
+    id
+    message
+    type
+    read
+    createdAt
+  }
+}
+
+# Contar notificações não lidas
+query CountUnreadNotifications {
+  countMyUnreadNotifications
+}
+```
+
+### Mutations
+
+```graphql
+# Marcar notificação como lida
+mutation MarkNotificationAsRead($id: String!) {
+  markNotificationAsRead(id: $id) {
+    id
+    read
+  }
+}
+
+# Marcar todas as notificações como lidas
+mutation MarkAllNotificationsAsRead {
+  markAllNotificationsAsRead
+}
+```
+
+## 🔐 Autenticação
+
+O serviço utiliza JWT para autenticação. Inclua o token no header:
+
+```http
+Authorization: <jwt-token>
+```
+
+O token deve ser válido e conter:
+
+```json
+{
+  "user": {
+    "id": "user-id"
+  }
+}
+```
+
+## 🔔 Integração com RabbitMQ
+
+O serviço consome mensagens do RabbitMQ para criar notificações:
+
+**Exchange**: `notifications_exchange`  
+**Routing Key**: `notification.created`  
+**Queue**: `notifications_queue`
+
+**Formato da mensagem:**
+
+```json
+{
+  "id": "unique-id",
+  "userId": "user-id",
+  "message": "NEW_MESSAGE",
+  "type": "info"
+}
+```
+
+**Tipos de mensagem:**
+
+- `NEW_MESSAGE` - Nova mensagem no chat
+- `NEW_CHAT` - Novo chat criado
+- `NEW_COMMENT` - Novo comentário no post
+- `NEW_LIKE` - Nova curtida no post
+
+## 🏗️ Arquitetura
+
+### Notification Flow
+
+1. **Consumo**: RabbitMQ envia notificação para a fila
+2. **Persistência**: Notificação é salva no MongoDB
+3. **Distribuição**: Notificação é publicada via PubSub
+4. **Subscription**: Clientes conectados recebem a notificação em tempo real
+
+### Gestão de Estado
+
+- **Status de leitura**: Notificações são marcadas como lidas individualmente ou em massa
+- **Filtragem**: Notificações são filtradas por usuário usando o contexto de autenticação
+- **Limite**: Queries suportam limite de resultados para paginação
+
+## 🔄 WebSocket Subscriptions
+
+O serviço utiliza WebSocket (graphql-ws) para subscriptions em tempo real:
+
+```typescript
+// Conexão WebSocket
+const wsClient = createClient({
+  url: 'ws://localhost:4000',
+  connectionParams: {
+    Authorization: 'your-jwt-token',
+  },
+});
+```
+
+## 🧪 Testes
+
+```bash
+# Executar testes unitários
+npm run test
+
+# Executar testes com coverage
+npm run test:cov
+
+# Executar testes em modo watch
+npm run test:watch
+
+# Executar testes e2e
+npm run test:e2e
+```
+
+## 📊 Scripts NPM
+
+- `npm run start` - Iniciar em modo produção
+- `npm run start:dev` - Iniciar em modo desenvolvimento
+- `npm run start:debug` - Iniciar em modo debug
+- `npm run build` - Compilar o projeto
+- `npm run format` - Formatar código com Prettier
+- `npm run lint` - Executar ESLint
+
+## 🔧 Configuração de Banco de Dados
+
+### MongoDB
+
+O serviço usa MongoDB para persistência. Configure a string de conexão:
+
+```env
+MONGO_URI=mongodb://username:password@host:port/database
+```
+
+### Schema do Banco
+
+**Collection: notifications**
+
+```typescript
+{
+  userId: string; // ID do usuário (required)
+  message: Message; // Tipo de mensagem (required)
+  type: Type; // Tipo de notificação (required)
+  read: boolean; // Status de leitura (default: false)
+  createdAt: Date; // Data de criação
+  updatedAt: Date; // Data de atualização
+}
+```
+
+**Indexes:**
+
+- `userId + _id` (unique)
+
+## 🔧 Configuração RabbitMQ
+
+O serviço precisa de uma conexão RabbitMQ configurada:
+
+```env
+RABBITMQ_URI=amqp://guest:guest@localhost:5672
+```
+
+**Exchange Configuration:**
+
+- Nome: `notifications_exchange`
+- Tipo: `topic`
+
+## 📈 Performance
+
+- **Subscriptions**: Utiliza PubSub in-memory para baixa latência
+- **Queries**: Índice em userId para consultas rápidas
+- **Real-time**: WebSocket para distribuição eficiente de notificações
+
+## 🛡️ Segurança
+
+- **JWT Authentication**: Token obrigatório nas requisições
+- **User Isolation**: Notificações filtradas automaticamente por usuário
+- **Subscription Filtering**: Apenas o usuário correto recebe notificações
+
+## 📝 Licença
+
+UNLICENSED
+
+## 👤 Autor
+
+Glasser Study Team
