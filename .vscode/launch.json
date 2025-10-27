@@ -126,11 +126,89 @@
         "${workspaceFolder}/**",
         "!**/node_modules/**"
       ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Users Service",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:prod"],
+      "cwd": "${workspaceFolder}/user-service",
+      "console": "externalTerminal",
+      "restart": true,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Posts Service",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:prod"],
+      "cwd": "${workspaceFolder}/post-service",
+      "console": "externalTerminal",
+      "restart": true,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Message Service",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:prod"],
+      "cwd": "${workspaceFolder}/message-service",
+      "console": "externalTerminal",
+      "restart": true,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Reports Service",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:prod"],
+      "cwd": "${workspaceFolder}/report-service",
+      "console": "externalTerminal",
+      "restart": true,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Notification Service",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:prod"],
+      "cwd": "${workspaceFolder}/notification-service",
+      "console": "externalTerminal",
+      "restart": true,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Gateway",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:prod"],
+      "cwd": "${workspaceFolder}/router",
+      "console": "externalTerminal",
+      "restart": true,
+      "env": {
+        "NODE_ENV": "production"
+      }
     }
   ],
   "compounds": [
     {
-      "name": "Start All Services",
+      "name": "Debug All Services",
       "configurations": [
         "Debug Users Service",
         "Debug Posts Service",
@@ -141,6 +219,32 @@
       ],
       "stopAll": true,
       "preLaunchTask": "start-containers"
+    },
+    {
+      "name": "Run All Services (Production)",
+      "configurations": [
+        "Run Users Service",
+        "Run Posts Service",
+        "Run Message Service",
+        "Run Reports Service",
+        "Run Notification Service",
+        "Run Gateway"
+      ],
+      "stopAll": true,
+      "preLaunchTask": "start-containers"
+    },
+    {
+      "name": "Build and Run All Services (Production)",
+      "configurations": [
+        "Run Users Service",
+        "Run Posts Service",
+        "Run Message Service",
+        "Run Reports Service",
+        "Run Notification Service",
+        "Run Gateway"
+      ],
+      "stopAll": true,
+      "preLaunchTask": "Build All Services and Start Containers"
     }
   ]
 }

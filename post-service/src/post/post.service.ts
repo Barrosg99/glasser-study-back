@@ -78,7 +78,7 @@ export class PostService {
       };
     }
 
-    return this.postModel.find(query).sort({ updatedAt: -1 });
+    return this.postModel.find(query).sort({ createdAt: -1 });
   }
 
   countPosts(): Promise<number> {

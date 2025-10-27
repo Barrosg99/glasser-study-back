@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { v4 as uuidv4 } from 'uuid';
 import { User } from './models/user.model';
 import {
   CreateUserDto,
@@ -17,11 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 
 import { AdminEditUserDto } from './dto/admin-edit-user.dto';
-import {
-  Period,
-  UserSummaryResponse,
-  UserSummaryInput,
-} from './dto/user-summary.dto';
+import { Period, UserSummaryResponse } from './dto/user-summary.dto';
 
 const saltOrRounds = 10;
 
@@ -96,7 +91,7 @@ export class UserService {
       Bucket: this.bucketName,
       Key: key,
       ContentType: type,
-      ACL: 'public-read'
+      ACL: 'public-read',
     });
 
     const uploadUrl = await getSignedUrl(this.s3Client, command, {
@@ -105,7 +100,11 @@ export class UserService {
 
     return {
       uploadUrl,
-      publicUrl: `https://${this.bucketName}.s3.${this.configService.get<string>('AWS_REGION')}.amazonaws.com/${key}`,
+      publicUrl: `https://${
+        this.bucketName
+      }.s3.${this.configService.get<string>(
+        'AWS_REGION',
+      )}.amazonaws.com/${key}`,
     };
   }
 
@@ -176,17 +175,27 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(newPassword, saltOrRounds);
 
+    const oldPassword = user.password;
+
     await this.userModel.updateOne(
       { _id: user._id },
       { password: hashedPassword },
     );
 
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Password Reset',
-      text: `Your new password is: ${newPassword}`,
-      html: `<p>Your new password is: <strong>${newPassword}</strong></p>`,
-    });
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Password Reset',
+        text: `Your new password is: ${newPassword}`,
+        html: `<p>Your new password is: <strong>${newPassword}</strong></p>`,
+      });
+    } catch (error) {
+      await this.userModel.updateOne(
+        { _id: user._id },
+        { password: oldPassword },
+      );
+      throw new Error(error);
+    }
 
     return true;
   }
