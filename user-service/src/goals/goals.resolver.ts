@@ -15,6 +15,7 @@ import { Goals } from './models/goals.model';
 import { SaveGoalDto } from './dto/save-goal.dto';
 import { Types } from 'mongoose';
 import { ToggleTaskResponseDto } from './dto/toggle-task-response.dto';
+import { GoalSummaryInput, GoalSummaryResponse } from './dto/goal-summary.dto';
 
 @Resolver((of) => Goals)
 export class GoalsResolver {
@@ -62,5 +63,17 @@ export class GoalsResolver {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
     return this.goalsService.toggleTask({ goalId, taskId, userId });
+  }
+
+  @Query(() => GoalSummaryResponse)
+  async adminGetGoalSummary(
+    @Args('goalSummaryInput') goalSummaryInput: GoalSummaryInput,
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You do not have permission to execute this action.');
+
+    return this.goalsService.summary(goalSummaryInput.period);
   }
 }

@@ -14,6 +14,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoggedUserDto, LoggedUserResponse } from './dto/logged-user.dto';
 import { Types } from 'mongoose';
 import { AdminEditUserDto } from './dto/admin-edit-user.dto';
+import { UserSummaryResponse, UserSummaryInput } from './dto/user-summary.dto';
 
 @Resolver((of) => User)
 export class UserResolver {
@@ -113,6 +114,18 @@ export class UserResolver {
       throw new Error('You do not have permission to execute this action.');
 
     return this.usersService.findOne({ _id: new Types.ObjectId(id) });
+  }
+
+  @Query((returns) => UserSummaryResponse)
+  async adminGetUserSummary(
+    @Args('userSummaryInput') userSummaryInput: UserSummaryInput,
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You do not have permission to execute this action.');
+
+    return this.usersService.summary(userSummaryInput.period);
   }
 
   @Mutation((returns) => User)

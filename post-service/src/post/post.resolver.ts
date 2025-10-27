@@ -13,6 +13,8 @@ import { PostService } from './post.service';
 import { Post, User } from './models/post.model';
 import { SavePostDto } from './dto/save-post.dto';
 import { Types } from 'mongoose';
+import { PostSummaryResponse } from './dto/post-summary.dto';
+import { PostSummaryInput } from './dto/post-summary.dto';
 
 @Resolver(() => Post)
 export class PostResolver {
@@ -124,5 +126,17 @@ export class PostResolver {
       throw new Error('You do not have permission to execute this action.');
 
     return this.postService.remove({ id, isAdmin });
+  }
+
+  @Query((returns) => PostSummaryResponse)
+  async adminGetPostSummary(
+    @Args('postSummaryInput') postSummaryInput: PostSummaryInput,
+    @Context('isAdmin') isAdmin: boolean,
+    @Context('from') from: string,
+  ) {
+    if (from !== 'admin' || !isAdmin)
+      throw new Error('You do not have permission to execute this action.');
+
+    return this.postService.summary(postSummaryInput.period);
   }
 }
