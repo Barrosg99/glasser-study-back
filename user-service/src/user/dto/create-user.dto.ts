@@ -1,7 +1,7 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { UserGoal } from '../models/user.model';
 
-@InputType()
+@InputType({ description: 'Input data for creating a user' })
 export class CreateUserDto {
   @Field()
   readonly name: string;
@@ -16,7 +16,7 @@ export class CreateUserDto {
   readonly goal: UserGoal;
 }
 
-@InputType()
+@InputType({ description: 'Input data for updating a user' })
 export class UpdateUserDto {
   @Field()
   readonly name: string;
@@ -31,7 +31,7 @@ export class UpdateUserDto {
   readonly profileImageUrl?: string;
 }
 
-@ObjectType()
+@ObjectType({ description: 'Response for getting a presigned URL' })
 export class GetPresignedUrlResponse {
   @Field(() => String)
   readonly uploadUrl: string;

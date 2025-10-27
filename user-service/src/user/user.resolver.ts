@@ -24,7 +24,10 @@ import { UserSummaryResponse, UserSummaryInput } from './dto/user-summary.dto';
 export class UserResolver {
   constructor(private usersService: UserService) {}
 
-  @Query((returns) => User)
+  @Query((returns) => User, {
+    description:
+      'Get the current user, only accessible when the user is logged in',
+  })
   async me(@Context('userId') userId: Types.ObjectId) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
@@ -35,7 +38,9 @@ export class UserResolver {
     return user;
   }
 
-  @Query((returns) => User)
+  @Query((returns) => User, {
+    description: 'Get a user by email, Ex: user(email: "test@example.com")',
+  })
   async user(
     @Args('email') email: string,
     @Context('userId') userId: Types.ObjectId,
@@ -57,7 +62,9 @@ export class UserResolver {
     return user;
   }
 
-  @Query((returns) => GetPresignedUrlResponse)
+  @Query((returns) => GetPresignedUrlResponse, {
+    description: 'Get a presigned URL, Ex: getPresignedUrl(type: "image/jpeg")',
+  })
   async getPresignedUrl(
     @Args('type') type: string,
     @Context('userId') userId: Types.ObjectId,
@@ -70,12 +77,18 @@ export class UserResolver {
     return this.usersService.getPresignedUrl(type, userId);
   }
 
-  @Mutation((returns) => User)
+  @Mutation((returns) => User, {
+    description:
+      'Create a user, Ex: signUp(createUserData: { name: "John Doe", email: "john.doe@example.com", password: "password" })',
+  })
   async signUp(@Args('createUserData') createUserData: CreateUserDto) {
     return this.usersService.create(createUserData);
   }
 
-  @Mutation((returns) => User)
+  @Mutation((returns) => User, {
+    description:
+      'Update the current user, Ex: updateMe(userData: { name: "John Doe", email: "john.doe@example.com", password: "password" })',
+  })
   async updateMe(
     @Context('userId') userId: Types.ObjectId,
     @Args('userData') userData: UpdateUserDto,
@@ -83,7 +96,10 @@ export class UserResolver {
     return this.usersService.edit(userData, userId);
   }
 
-  @Mutation((returns) => LoggedUserResponse)
+  @Mutation((returns) => LoggedUserResponse, {
+    description:
+      'Login a user, Ex: login(userLoginData: { email: "john.doe@example.com", password: "password" })',
+  })
   async login(
     @Args('userLoginData') userLoginData: LoggedUserDto,
     @Context('from') from: string,
@@ -93,13 +109,18 @@ export class UserResolver {
     return loginData;
   }
 
-  @Mutation((returns) => Boolean)
+  @Mutation((returns) => Boolean, {
+    description:
+      'Reset a user password, Ex: resetPassword(email: "john.doe@example.com")',
+  })
   async resetPassword(@Args('email') email: string) {
     return this.usersService.resetPassword(email);
   }
 
   // only for admin
-  @Query((returns) => [User])
+  @Query((returns) => [User], {
+    description: 'Get all users (admin only).',
+  })
   async adminGetUsers(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,
@@ -110,7 +131,7 @@ export class UserResolver {
     return this.usersService.findAll();
   }
 
-  @Query((returns) => Int)
+  @Query((returns) => Int, { description: 'Count all users (admin only)' })
   async adminCountUsers(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,
@@ -121,7 +142,10 @@ export class UserResolver {
     return this.usersService.countUsers();
   }
 
-  @Query((returns) => User)
+  @Query((returns) => User, {
+    description:
+      'Get a user by ID (admin only), Ex: adminGetUser(id: "1234567890")',
+  })
   async adminGetUser(
     @Args('id', { type: () => ID }) id: string,
     @Context('isAdmin') isAdmin: boolean,
@@ -133,7 +157,10 @@ export class UserResolver {
     return this.usersService.findOne({ _id: new Types.ObjectId(id) });
   }
 
-  @Query((returns) => UserSummaryResponse)
+  @Query((returns) => UserSummaryResponse, {
+    description:
+      'Get a user summary (admin only), Ex: adminGetUserSummary(userSummaryInput: { period: "WEEK" })',
+  })
   async adminGetUserSummary(
     @Args('userSummaryInput') userSummaryInput: UserSummaryInput,
     @Context('isAdmin') isAdmin: boolean,
@@ -145,7 +172,10 @@ export class UserResolver {
     return this.usersService.summary(userSummaryInput.period);
   }
 
-  @Mutation((returns) => User)
+  @Mutation((returns) => User, {
+    description:
+      'Edit a user by admin, Ex: adminEditUser(userData: { isAdmin: true, blocked: true }, userId: "1234567890")',
+  })
   async adminEditUser(
     @Args('userData') userData: AdminEditUserDto,
     @Args('userId', { type: () => ID }) userId: string,

@@ -27,11 +27,11 @@ export enum ReportStatus {
   REJECTED = 'rejected',
 }
 
-registerEnumType(Entity, { name: 'Entity' });
-registerEnumType(ReportStatus, { name: 'ReportStatus' });
+registerEnumType(Entity, { name: 'Entity', description: 'Represents an entity that can be reported' });
+registerEnumType(ReportStatus, { name: 'ReportStatus', description: 'Represents the status of a report' });
 
 @Schema({ timestamps: true })
-@ObjectType()
+@ObjectType({ description: 'Represents a report in the system' })
 export class Report extends Document {
   @Field(() => ID, { name: 'id' })
   _id: Types.ObjectId;

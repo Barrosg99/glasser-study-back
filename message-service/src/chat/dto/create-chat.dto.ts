@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { Types } from 'mongoose';
 
-@InputType()
+@InputType({ description: 'Input data for creating a chat' })
 export class CreateChatDto {
   @Field()
   readonly name: string;

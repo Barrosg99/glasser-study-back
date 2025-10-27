@@ -17,17 +17,17 @@ import { User, Post } from 'src/post/models/post.model';
 export class LikeResolver {
   constructor(private likeService: LikeService) {}
 
-  @ResolveField(() => Post)
+  @ResolveField(() => Post, { description: 'Get the post for a like' })
   async post(@Parent() like: Like) {
     return this.likeService.getPost(like.post);
   }
 
-  @ResolveField(() => User)
+  @ResolveField(() => User, { description: 'Get the user for a like' })
   user(@Parent() like: Like) {
     return { _typename: 'User', id: like.user };
   }
 
-  @Mutation(() => Like, { nullable: true })
+  @Mutation(() => Like, { nullable: true, description: 'Toggle a like, Ex: toggleLike(input: { postId: "1234567890" })' })
   async toggleLike(
     @Context('userId') userId: Types.ObjectId,
     @Args('input') input: CreateLikeDto,
@@ -40,7 +40,7 @@ export class LikeResolver {
     );
   }
 
-  @Query(() => [Like])
+  @Query(() => [Like], { description: 'Get all likes for a post, Ex: getLikes(postId: "1234567890")' })
   async getLikes(@Args('postId', { type: () => String }) postId: string) {
     return this.likeService.getLikes(new Types.ObjectId(postId));
   }

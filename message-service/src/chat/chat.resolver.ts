@@ -18,7 +18,7 @@ import { Types } from 'mongoose';
 export class ChatResolver {
   constructor(private readonly chatService: ChatService) {}
 
-  @ResolveField(() => [Member])
+  @ResolveField(() => [Member], { description: 'Get the members of a chat' })
   members(@Parent() chat: Chat) {
     const members = [
       ...chat.members.map((member) => member.user),
@@ -33,22 +33,31 @@ export class ChatResolver {
     }));
   }
 
-  @ResolveField(() => Boolean)
+  @ResolveField(() => Boolean, {
+    description: 'Check if the current user is a moderator of the chat',
+  })
   isModerator(@Parent() chat: Chat, @Context('userId') userId: Types.ObjectId) {
     return chat.moderator.equals(userId);
   }
 
-  @ResolveField(() => Boolean)
+  @ResolveField(() => Boolean, {
+    description: 'Check if the current user is invited to the chat',
+  })
   isInvited(@Parent() chat: Chat, @Context('userId') userId: Types.ObjectId) {
     return chat.invitedMembers.includes(userId);
   }
 
-  @ResolveField(() => Boolean)
+  @ResolveField(() => Boolean, {
+    description: 'Check if the current user has read the chat',
+  })
   hasRead(@Parent() chat: Chat, @Context('userId') userId: Types.ObjectId) {
     return !!chat.members.find((member) => member.user.equals(userId))?.hasRead;
   }
 
-  @Query((returns) => [Chat])
+  @Query((returns) => [Chat], {
+    description:
+      'Get all chats for the current user, Ex: myChats(search: "Search term")',
+  })
   myChats(
     @Context('userId') userId: Types.ObjectId,
     @Args('search', { type: () => String, nullable: true }) search: string,
@@ -58,7 +67,10 @@ export class ChatResolver {
     return this.chatService.findAll(userId, search);
   }
 
-  @Mutation((returns) => Chat)
+  @Mutation((returns) => Chat, {
+    description:
+      'Save a chat, Ex: saveChat(saveChatDto: { name: "Chat 1", description: "Chat description", membersIds: ["1234567890", "1234567891"] })',
+  })
   saveChat(
     @Context('userId') userId: Types.ObjectId,
     @Args('id', { type: () => String, nullable: true }) id: string,
@@ -69,7 +81,9 @@ export class ChatResolver {
     return this.chatService.save(saveChatDto, userId, id);
   }
 
-  @Mutation((returns) => Chat)
+  @Mutation((returns) => Chat, {
+    description: 'Remove a chat, Ex: removeChat(id: "1234567890")',
+  })
   removeChat(
     @Context('userId') userId: Types.ObjectId,
     @Args('id', { type: () => String }) id: string,
@@ -79,7 +93,10 @@ export class ChatResolver {
     return this.chatService.remove(id, userId);
   }
 
-  @Mutation((returns) => Boolean)
+  @Mutation((returns) => Boolean, {
+    description:
+      'Manage an invitation, Ex: manageInvitation(id: "1234567890", accept: true)',
+  })
   manageInvitation(
     @Context('userId') userId: Types.ObjectId,
     @Args('id', { type: () => String }) id: string,
@@ -90,7 +107,9 @@ export class ChatResolver {
     return this.chatService.manageInvitation(id, userId, accept);
   }
 
-  @Mutation((returns) => Boolean)
+  @Mutation((returns) => Boolean, {
+    description: 'Exit a chat, Ex: exitChat(id: "1234567890")',
+  })
   exitChat(
     @Context('userId') userId: Types.ObjectId,
     @Args('id', { type: () => String }) id: string,
@@ -100,7 +119,7 @@ export class ChatResolver {
   }
 
   // only for admin
-  @Query((returns) => [Chat])
+  @Query((returns) => [Chat], { description: 'Get all chats (admin only)' })
   adminGetChats(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,
@@ -110,7 +129,7 @@ export class ChatResolver {
     return this.chatService.findAll();
   }
 
-  @Query((returns) => Int)
+  @Query((returns) => Int, { description: 'Count all chats (admin only)' })
   adminCountChats(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,
@@ -121,7 +140,10 @@ export class ChatResolver {
     return this.chatService.countChats();
   }
 
-  @Query((returns) => Chat)
+  @Query((returns) => Chat, {
+    description:
+      'Get a chat by ID (admin only), Ex: adminGetChat(id: "1234567890")',
+  })
   adminGetChat(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,

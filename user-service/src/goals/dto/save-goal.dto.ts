@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 
-@InputType()
+@InputType({ description: 'Input data for saving a task' })
 export class SaveTaskDto {
   @Field()
   readonly name: string;
@@ -12,7 +12,7 @@ export class SaveTaskDto {
   readonly completed: boolean;
 }
 
-@InputType()
+@InputType({ description: 'Input data for saving a goal' })
 export class SaveGoalDto {
   @Field()
   readonly name: string;

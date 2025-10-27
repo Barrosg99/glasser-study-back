@@ -1,7 +1,7 @@
 import { Field, ID, InputType, Int } from '@nestjs/graphql';
 import { Types } from 'mongoose';
 
-@InputType()
+@InputType({ description: 'Input data for querying messages' })
 export class QueryMessagesInput {
   @Field(() => ID)
   readonly chatId: Types.ObjectId;

@@ -30,7 +30,10 @@ export class PostResolver {
     return { _typename: 'User', id: post.author };
   }
 
-  @Mutation(() => Post)
+  @Mutation(() => Post, {
+    description:
+      'Save a post, Ex: savePost(savePostDto: { title: "Post 1", subject: "Subject 1", description: "Description 1", tags: ["Tag 1", "Tag 2"], materials: [{ name: "Material 1", link: "https://example.com", type: "VIDEO" }] })',
+  })
   savePost(
     @Context('userId') userId: Types.ObjectId,
     @Args('savePostInput') savePostInput: SavePostDto,
@@ -41,7 +44,11 @@ export class PostResolver {
     return this.postService.save(id, savePostInput, userId);
   }
 
-  @Query(() => [Post], { name: 'posts' })
+  @Query(() => [Post], {
+    name: 'posts',
+    description:
+      'Get all posts, Ex: posts(searchTerm: "Search term", searchFilter: "Search filter", subject: "Subject", materialType: "Material type")',
+  })
   findAll(
     @Args('searchTerm', { type: () => String, nullable: true })
     searchTerm?: string,
@@ -59,19 +66,27 @@ export class PostResolver {
     });
   }
 
-  @Query(() => Post, { name: 'post' })
+  @Query(() => Post, {
+    name: 'post',
+    description: 'Get a post by ID, Ex: post(id: "1234567890")',
+  })
   findOne(@Args('id', { type: () => ID }) id: string) {
     return this.postService.findOne(id);
   }
 
-  @Query(() => [Post], { name: 'myPosts' })
+  @Query(() => [Post], {
+    name: 'myPosts',
+    description: 'Get all posts for the current user',
+  })
   findMyPosts(@Context('userId') userId: Types.ObjectId) {
     if (!userId) throw new Error('You must be logged to execute this action.');
 
     return this.postService.findAll({ userId });
   }
 
-  @Mutation(() => Post)
+  @Mutation(() => Post, {
+    description: 'Remove a post, Ex: removePost(id: "1234567890")',
+  })
   removePost(
     @Context('userId') userId: Types.ObjectId,
     @Args('id', { type: () => ID }) id: string,
@@ -82,7 +97,7 @@ export class PostResolver {
   }
 
   // only admin
-  @Query(() => [Post])
+  @Query(() => [Post], { description: 'Get all posts (admin only)' })
   adminGetPosts(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,
@@ -93,7 +108,7 @@ export class PostResolver {
     return this.postService.findAll({ isAdmin });
   }
 
-  @Query(() => Int)
+  @Query(() => Int, { description: 'Count all posts (admin only)' })
   adminCountPosts(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,
@@ -104,7 +119,10 @@ export class PostResolver {
     return this.postService.countPosts();
   }
 
-  @Query(() => Post)
+  @Query(() => Post, {
+    description:
+      'Get a post by ID (admin only), Ex: adminGetPost(id: "1234567890")',
+  })
   adminGetPost(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,
@@ -116,7 +134,10 @@ export class PostResolver {
     return this.postService.findOne(id);
   }
 
-  @Mutation(() => Post)
+  @Mutation(() => Post, {
+    description:
+      'Delete a post (admin only), Ex: adminDeletePost(id: "1234567890")',
+  })
   adminDeletePost(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,
@@ -128,7 +149,10 @@ export class PostResolver {
     return this.postService.remove({ id, isAdmin });
   }
 
-  @Query((returns) => PostSummaryResponse)
+  @Query((returns) => PostSummaryResponse, {
+    description:
+      'Get a post summary (admin only), Ex: adminGetPostSummary(postSummaryInput: { period: "WEEK" })',
+  })
   async adminGetPostSummary(
     @Args('postSummaryInput') postSummaryInput: PostSummaryInput,
     @Context('isAdmin') isAdmin: boolean,

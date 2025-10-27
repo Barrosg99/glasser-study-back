@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { MaterialType } from '../models/post.model';
 
-@InputType()
+@InputType({ description: 'Input data for saving a post' })
 export class MaterialInput {
   @Field()
   name: string;
@@ -13,7 +13,7 @@ export class MaterialInput {
   type: MaterialType;
 }
 
-@InputType()
+@InputType({ description: 'Input data for saving a post' })
 export class SavePostDto {
   @Field()
   readonly title: string;

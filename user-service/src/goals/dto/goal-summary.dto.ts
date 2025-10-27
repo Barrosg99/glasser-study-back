@@ -7,7 +7,7 @@ import {
 } from '@nestjs/graphql';
 import { Period } from 'src/user/dto/user-summary.dto';
 
-@ObjectType()
+@ObjectType({ description: 'Response for getting a goal summary' })
 export class GoalSummaryResponse {
   @Field(() => [Int])
   data: number[];
@@ -16,7 +16,7 @@ export class GoalSummaryResponse {
   labels: string[];
 }
 
-@InputType()
+@InputType({ description: 'Input data for getting a goal summary' })
 export class GoalSummaryInput {
   @Field(() => Period)
   period: Period;

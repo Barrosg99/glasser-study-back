@@ -30,7 +30,10 @@ export class ReportResolver {
     return { _typename: 'User', id: report.resolvedBy };
   }
 
-  @Query(() => [Report])
+  @Query(() => [Report], {
+    description:
+      'Get all reports (admin only), Ex: reports(queryReportsDto: { status: "PENDING", entity: "USER", reason: "Reason 1" })',
+  })
   async reports(
     @Args('queryReportsDto', { nullable: true })
     queryReportsDto: QueryReportsDto,
@@ -43,7 +46,10 @@ export class ReportResolver {
     return this.reportService.findAll(queryReportsDto);
   }
 
-  @Query(() => Int)
+  @Query(() => Int, {
+    description:
+      'Count all reports (admin only), Ex: countReports(queryReportsDto: { status: "PENDING", entity: "USER", reason: "Reason 1" })',
+  })
   async countReports(
     @Args('queryReportsDto', { nullable: true })
     queryReportsDto: QueryReportsDto,
@@ -56,7 +62,10 @@ export class ReportResolver {
     return this.reportService.count(queryReportsDto);
   }
 
-  @Query(() => Report)
+  @Query(() => Report, {
+    description:
+      'Get a report by ID (admin only), Ex: report(id: "1234567890")',
+  })
   async report(
     @Context('isAdmin') isAdmin: boolean,
     @Context('from') from: string,
@@ -68,7 +77,10 @@ export class ReportResolver {
     return this.reportService.findOne(id);
   }
 
-  @Mutation(() => Report)
+  @Mutation(() => Report, {
+    description:
+      'Create a report, Ex: createReport(saveReportDto: { entity: "USER", entityId: "1234567890", reason: "Reason 1", description: "Description 1" })',
+  })
   async createReport(
     @Context('userId') userId: Types.ObjectId,
     @Args('saveReportDto') saveReportDto: SaveReportDto,
@@ -78,7 +90,10 @@ export class ReportResolver {
     return this.reportService.create({ saveReportDto, userId });
   }
 
-  @Mutation(() => Report)
+  @Mutation(() => Report, {
+    description:
+      'Resolve a report, Ex: resolveReport(id: "1234567890", resolvedReason: "Resolved Reason", status: "RESOLVED")',
+  })
   async resolveReport(
     @Context('userId') userId: Types.ObjectId,
     @Args('id', { type: () => ID }) id: Types.ObjectId,

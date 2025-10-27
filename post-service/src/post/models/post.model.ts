@@ -19,9 +19,9 @@ export enum MaterialType {
   TEACHING = 'teaching',
 }
 
-registerEnumType(MaterialType, { name: 'MaterialType' });
+registerEnumType(MaterialType, { name: 'MaterialType', description: 'Represents a material type' });
 
-@ObjectType()
+@ObjectType({ description: 'Represents a material in the system' })
 @Schema()
 export class Material {
   @Field()
@@ -46,7 +46,7 @@ export class User {
   id: Types.ObjectId;
 }
 
-@ObjectType()
+@ObjectType({ description: 'Represents a post in the system' })
 @Schema({ timestamps: true })
 export class Post extends Document {
   @Field(() => ID)
