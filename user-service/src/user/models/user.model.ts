@@ -51,6 +51,10 @@ export class User {
   @Prop({ required: true, default: false })
   blocked: boolean;
 
+  @Field(() => String, { nullable: true })
+  @Prop({ required: false })
+  profileImageUrl: string;
+
   @Field(() => Date, { nullable: true })
   createdAt: Date;
 

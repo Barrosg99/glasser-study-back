@@ -10,7 +10,11 @@ import {
 } from '@nestjs/graphql';
 import { User } from './models/user.model';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import {
+  CreateUserDto,
+  GetPresignedUrlResponse,
+  UpdateUserDto,
+} from './dto/create-user.dto';
 import { LoggedUserDto, LoggedUserResponse } from './dto/logged-user.dto';
 import { Types } from 'mongoose';
 import { AdminEditUserDto } from './dto/admin-edit-user.dto';
@@ -53,6 +57,19 @@ export class UserResolver {
     return user;
   }
 
+  @Query((returns) => GetPresignedUrlResponse)
+  async getPresignedUrl(
+    @Args('type') type: string,
+    @Context('userId') userId: Types.ObjectId,
+  ) {
+    if (!userId) throw new Error('You must be logged to execute this action.');
+
+    if (type !== 'image/jpeg' && type !== 'image/png' && type !== 'image/jpg')
+      throw new Error('Invalid file type. Only JPEG, PNG and JPG are allowed.');
+
+    return this.usersService.getPresignedUrl(type, userId);
+  }
+
   @Mutation((returns) => User)
   async signUp(@Args('createUserData') createUserData: CreateUserDto) {
     return this.usersService.create(createUserData);
@@ -61,7 +78,7 @@ export class UserResolver {
   @Mutation((returns) => User)
   async updateMe(
     @Context('userId') userId: Types.ObjectId,
-    @Args('userData') userData: CreateUserDto,
+    @Args('userData') userData: UpdateUserDto,
   ) {
     return this.usersService.edit(userData, userId);
   }
